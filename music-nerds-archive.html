@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Music Nerds Archive</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f0e0d;--fg:#f0ece4;--muted:rgba(255,255,255,0.3);--dim:rgba(255,255,255,0.15);--card:rgba(255,255,255,0.025);--border:rgba(255,255,255,0.06);--accent:#E8927C}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:'DM Sans','Helvetica Neue',sans-serif;max-width:740px;margin:0 auto;min-height:100vh}
+h1,h2,h3{font-family:'Playfair Display',Georgia,serif}
+nav{position:sticky;top:0;z-index:100;background:rgba(15,14,13,0.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;padding:0 4px;-webkit-overflow-scrolling:touch}
+nav button{padding:9px 9px;border:none;background:none;cursor:pointer;color:var(--muted);font-size:10px;font-weight:500;border-bottom:2px solid transparent;white-space:nowrap;font-family:'DM Sans',sans-serif;transition:all .15s}
+nav button.active{color:var(--fg);font-weight:700;border-bottom-color:var(--accent)}
+nav button:hover{color:var(--fg)}
+.view{display:none;padding:0 14px 20px}.view.active{display:block}
+.pick-card{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:8px 10px;display:flex;gap:8px;align-items:flex-start;transition:background .15s}
+.pick-card:hover{background:rgba(255,255,255,0.04)}
+.pick-card .info{flex:1;min-width:0}
+.pick-card .rank{color:var(--muted);font-size:9px;font-weight:700;font-family:monospace}
+.pick-card .album-name{font-weight:700;color:var(--fg);font-size:12px}
+.pick-card .artist-name{color:rgba(255,255,255,0.4);font-size:10px;margin-top:1px}
+.pick-card .track{color:rgba(255,255,255,0.22);font-size:9px;margin-top:1px}
+.pick-card .note{color:rgba(255,255,255,0.18);font-size:9px;margin-top:2px;font-style:italic}
+.pick-card .meta{display:flex;gap:3px;margin-top:3px;flex-wrap:wrap}
+.top5{font-size:7px;background:rgba(232,146,124,0.2);color:var(--accent);padding:1px 4px;border-radius:2px;font-weight:700;vertical-align:middle}
+.badge{display:inline-flex;align-items:center;gap:3px;border-radius:14px;padding:1px 7px;font-size:9px;font-weight:600;white-space:nowrap}
+.badge .dot{width:4px;height:4px;border-radius:50%}
+.cover{border-radius:4px;overflow:hidden;flex-shrink:0;background:rgba(255,255,255,0.05)}
+.cover img{width:100%;height:100%;object-fit:cover;display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:20px}
+.stat-box{background:var(--card);border-radius:7px;padding:10px 6px;text-align:center;border:1px solid rgba(255,255,255,0.04)}
+.stat-box .val{font-size:20px;font-weight:800;font-family:monospace}
+.stat-box .label{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:1px}
+.consensus-row{display:flex;align-items:center;gap:8px;background:var(--card);border-radius:6px;padding:6px 10px;border:1px solid rgba(255,255,255,0.04);margin-bottom:4px}
+.consensus-row .c-info{flex:1;min-width:0}
+.consensus-row .c-album{font-weight:700;font-size:11px}
+.consensus-row .c-artist{color:rgba(255,255,255,0.35);font-size:10px}
+.consensus-row .c-badges{display:flex;gap:2px;flex-wrap:wrap}
+.artist-pill{background:var(--card);border-radius:12px;padding:3px 8px;border:1px solid rgba(255,255,255,0.05);font-size:10px;display:inline-block;margin:0 3px 4px 0}
+.thread-row{display:flex;align-items:center;gap:8px;padding:5px 10px;background:rgba(255,255,255,0.015);border-radius:5px;margin-bottom:3px}
+.thread-row .yr{font-weight:800;font-size:14px;font-family:monospace;width:36px}
+.section-person{margin-bottom:20px}
+.section-person .sp-head{display:flex;align-items:center;gap:5px;margin-bottom:6px}
+.section-person .sp-name{font-size:12px;font-weight:700}
+.section-person .sp-count{font-size:10px;color:rgba(255,255,255,0.2)}
+.picks-list{display:flex;flex-direction:column;gap:3px}
+.section-title{font-size:13px;font-weight:700;margin-bottom:8px}
+.section-sub{font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:6px}
+.search-input{width:100%;padding:8px 11px;border-radius:6px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);color:var(--fg);font-size:12px;outline:none;margin-bottom:10px;font-family:'DM Sans',sans-serif}
+.nerd-bar{display:flex;align-items:center;gap:6px;padding:4px 0}
+.nerd-bar .bar-bg{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,0.04);overflow:hidden}
+.nerd-bar .bar-fill{height:100%;border-radius:2px}
+.nerd-bar .bar-label{font-size:9px;color:rgba(255,255,255,0.25);font-family:monospace;min-width:50px;text-align:right}
+.overlap-table{border-collapse:collapse}
+.overlap-table th{padding:2px;font-size:8px;font-weight:700;writing-mode:vertical-rl;height:40px}
+.overlap-table td{padding:2px;text-align:center;font-size:10px;font-weight:700;font-family:monospace;border-radius:2px}
+.overlap-table .row-label{font-size:9px;font-weight:600;padding:1px 4px;text-align:left}
+.insight{padding:6px 8px;background:rgba(255,255,255,0.015);border-radius:5px;margin-bottom:3px}
+.insight .i-title{font-size:11px;font-weight:700}
+.insight .i-desc{font-size:10px;color:var(--muted);margin-top:1px}
+.person-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.person-card{background:var(--card);border-radius:8px;padding:12px}
+.artist-card{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:8px 10px;display:flex;gap:8px;align-items:center}
+.artist-card .a-name{font-weight:700;font-size:12px}
+.artist-card .a-meta{font-size:9px;color:var(--muted)}
+.footer{text-align:center;padding:20px 14px 28px;border-top:1px solid rgba(255,255,255,0.03);margin-top:20px;font-size:9px;color:rgba(255,255,255,0.12)}
+</style>
+</head>
+<body>
+<nav id="nav"></nav>
+<div id="app"></div>
+<div class="footer"><span id="coverStatus"></span> Music Nerds Archive — Extracted from Gmail — 2020–2025 — Built with love & Claude</div>
+<script>
+const PEOPLE = {
+  taylor:{name:"Taylor Anderson",short:"Taylor",color:"#E8927C",emoji:"🎸"},
+  robert:{name:"R Robinson",short:"Robert",color:"#7CADE8",emoji:"🎹"},
+  earl:{name:"Earl Frost-Parsons",short:"Earl",color:"#8CE87C",emoji:"🎵"},
+  huston:{name:"Huston Parkhurst",short:"Huston",color:"#E8D77C",emoji:"🤠"},
+  tyler:{name:"Tyler Valeska",short:"Tyler",color:"#C87CE8",emoji:"🎧"},
+  paul:{name:"Paul Soud",short:"Paul",color:"#7CE8D0",emoji:"🎶"},
+  brian:{name:"Brian McMahon",short:"Brian",color:"#E87CA8",emoji:"🎤"},
+  clint:{name:"Clint Roney",short:"Clint",color:"#A8E87C",emoji:"🎻"},
+  danny:{name:"Danny McMahon",short:"Danny",color:"#E8A87C",emoji:"🥁"},
+};
+// r=rank (ONLY if the person explicitly ranked), f=top5 flag, n=note, t=fav track
+const PICKS = [
+// ═══ 2020 ═══
+{y:2020,p:"danny",a:"Fleet Foxes",l:"Shore"},{y:2020,p:"danny",a:"Fruit Bats",l:"The Glory of Fruit Bats"},{y:2020,p:"danny",a:"Kevin Morby",l:"Sundowner"},{y:2020,p:"danny",a:"Sturgill Simpson",l:"Cuttin' Grass Vol. 1"},{y:2020,p:"danny",a:"Sylvan Esso",l:"Free Love"},
+{y:2020,p:"taylor",a:"Fiona Apple",l:"Fetch the Bolt Cutters",r:1,n:"Pitchfork 10. A modern Bob Dylan"},{y:2020,p:"taylor",a:"Adrianne Lenker",l:"songs",r:2,n:"Every song is gorgeous"},{y:2020,p:"taylor",a:"Bob Dylan",l:"Rough and Rowdy Ways",r:3},{y:2020,p:"taylor",a:"Fleet Foxes",l:"Shore",r:4},{y:2020,p:"taylor",a:"Andy Shauf",l:"Neon Skyline",r:5,n:"And fuck you Judy"},{y:2020,p:"taylor",a:"Perfume Genius",l:"Set My Heart on Fire Immediately",r:6},{y:2020,p:"taylor",a:"The Strokes",l:"The New Abnormal",r:7},{y:2020,p:"taylor",a:"Waxahatchee",l:"Saint Cloud",r:8},{y:2020,p:"taylor",a:"Run the Jewels",l:"RTJ4",r:9},{y:2020,p:"taylor",a:"Trace Mountains",l:"Lost in the Country",r:10},
+{y:2020,p:"tyler",a:"Moses Sumney",l:"grae"},{y:2020,p:"tyler",a:"Fiona Apple",l:"Fetch the Bolt Cutters"},{y:2020,p:"tyler",a:"Waxahatchee",l:"Saint Cloud",n:"If ranking, 1 or 2"},{y:2020,p:"tyler",a:"Hamilton Leithauser",l:"The Loves of Your Life"},{y:2020,p:"tyler",a:"Fleet Foxes",l:"Shore",n:"Probably AOTY"},{y:2020,p:"tyler",a:"Destroyer",l:"Have We Met"},{y:2020,p:"tyler",a:"Jeff Rosenstock",l:"NO DREAM"},{y:2020,p:"tyler",a:"Haim",l:"Women in Music Pt. III"},{y:2020,p:"tyler",a:"Bob Dylan",l:"Rough and Rowdy Ways"},
+{y:2020,p:"huston",a:"Waxahatchee",l:"Saint Cloud",n:"Listened 1000 times"},{y:2020,p:"huston",a:"Futurebirds",l:"Teamwork"},{y:2020,p:"huston",a:"Run the Jewels",l:"RTJ4",n:"If you don't like RTJ4, fuck you"},{y:2020,p:"huston",a:"Andy Shauf",l:"Neon Skyline",n:"That Judy is a real bitch"},{y:2020,p:"huston",a:"Freddie Gibbs",l:"Alfredo",n:"Started because I love Italian food"},{y:2020,p:"huston",a:"Bully",l:"SUGAREGG"},{y:2020,p:"huston",a:"Orville Peck",l:"Show Pony"},{y:2020,p:"huston",a:"Daniel Romano",l:"How Ill Thy World is Ordered"},{y:2020,p:"huston",a:"Fruit Bats",l:"The Pet Parade"},{y:2020,p:"huston",a:"Jason Isbell",l:"Reunions"},
+{y:2020,p:"clint",a:"Phoebe Bridgers",l:"Punisher",r:1},{y:2020,p:"clint",a:"Andy Shauf",l:"Neon Skyline",r:2},{y:2020,p:"clint",a:"The Strokes",l:"The New Abnormal",r:3},{y:2020,p:"clint",a:"Fiona Apple",l:"Fetch the Bolt Cutters",r:4},{y:2020,p:"clint",a:"Perfume Genius",l:"Set My Heart on Fire Immediately",r:5},{y:2020,p:"clint",a:"Stephen Malkmus",l:"Traditional Techniques",r:6},{y:2020,p:"clint",a:"Daniel Romano",l:"How Ill Thy World Is Ordered",r:7},{y:2020,p:"clint",a:"Run the Jewels",l:"RTJ4",r:8},{y:2020,p:"clint",a:"Waxahatchee",l:"Saint Cloud",r:9},{y:2020,p:"clint",a:"Luke Schneider",l:"Altar of Harmony",r:10},
+{y:2020,p:"earl",a:"Fleet Foxes",l:"Shore",r:1,n:"Hands down AOTY"},{y:2020,p:"earl",a:"Cut Worms",l:"Nobody Lives Here Anymore",r:2},{y:2020,p:"earl",a:"The Strokes",l:"The New Abnormal",r:3},{y:2020,p:"earl",a:"Haim",l:"Women In Music Pt. III",r:4},{y:2020,p:"earl",a:"Waxahatchee",l:"Saint Cloud",r:5},{y:2020,p:"earl",a:"Kevin Morby",l:"Sundowner",r:6},{y:2020,p:"earl",a:"Bully",l:"SUGAREGG",r:7},{y:2020,p:"earl",a:"Widowspeak",l:"Plum",r:8},{y:2020,p:"earl",a:"Run the Jewels",l:"RTJ4",r:9},{y:2020,p:"earl",a:"Matt Berninger",l:"Serpentine Prison",r:10},
+// ═══ 2021 ═══
+{y:2021,p:"danny",a:"Aaron Frazier",l:"Introducing..."},{y:2021,p:"danny",a:"Black Keys",l:"Delta Kream"},{y:2021,p:"danny",a:"Sierra Ferrell",l:"Long Time Coming"},{y:2021,p:"danny",a:"Shannon and the Clams",l:"Year of the Spider"},{y:2021,p:"danny",a:"Billy Strings",l:"Renewal"},{y:2021,p:"danny",a:"Pokey LaFarge",l:"In the Blossom of their Shade"},{y:2021,p:"danny",a:"Fleet Foxes",l:"A Very Lonely Solstice"},{y:2021,p:"danny",a:"Houndmouth",l:"Good For You"},{y:2021,p:"danny",a:"Andrew Bird & Jimbo Mathus",l:"These 13"},{y:2021,p:"danny",a:"Benny Sings",l:"Beat Tape II"},
+{y:2021,p:"taylor",a:"Big Red Machine",l:"How Long Do You Think It's Gonna Last"},{y:2021,p:"taylor",a:"Billy Strings",l:"Renewal",n:"Most listened to album of the year"},{y:2021,p:"taylor",a:"Sierra Ferrell",l:"Long Time Coming"},{y:2021,p:"taylor",a:"Goose",l:"Shenanigans Nite Club"},{y:2021,p:"taylor",a:"Cory Hanson",l:"Pale Horse Rider",n:"May be my favorite. I hear Thom Yorke"},{y:2021,p:"taylor",a:"Andy Shauf",l:"Wilds"},{y:2021,p:"taylor",a:"Snail Mail",l:"Valentine"},{y:2021,p:"taylor",a:"Tex Crick",l:"Live in New York City"},{y:2021,p:"taylor",a:"Trace Mountains",l:"HOUSE OF CONFUSION"},{y:2021,p:"taylor",a:"The War on Drugs",l:"I Don't Live Here Anymore"},{y:2021,p:"taylor",a:"Tyler, The Creator",l:"CALL ME IF YOU GET LOST"},
+{y:2021,p:"huston",a:"Chika",l:"Once Upon a Time",n:"Alabama rapper. SLAPS"},{y:2021,p:"huston",a:"Julien Baker",l:"Little Oblivions"},{y:2021,p:"huston",a:"Fruit Bats",l:"Siamese Dream"},{y:2021,p:"huston",a:"Sierra Ferrell",l:"Long Time Coming"},{y:2021,p:"huston",a:"Big Red Machine",l:"How Long...",n:"Came for T-Swift. Stayed for T-Swift"},{y:2021,p:"huston",a:"Andy Shauf",l:"Wilds"},{y:2021,p:"huston",a:"Duckwrth",l:"SG8"},{y:2021,p:"huston",a:"Billy Strings",l:"Renewal"},
+{y:2021,p:"earl",a:"Iceage",l:"Seek Shelter"},{y:2021,p:"earl",a:"Wolf Alice",l:"Blue Weekend"},{y:2021,p:"earl",a:"The Marias",l:"CINEMA"},{y:2021,p:"earl",a:"Hovvdy",l:"True Love"},{y:2021,p:"earl",a:"Snail Mail",l:"Valentine"},{y:2021,p:"earl",a:"Lana Del Rey",l:"Chemtrails Over the Country Club"},{y:2021,p:"earl",a:"Cory Hanson",l:"Pale Horse Rider"},{y:2021,p:"earl",a:"Parquet Courts",l:"Sympathy for Life"},{y:2021,p:"earl",a:"Goat Girl",l:"On All Fours"},{y:2021,p:"earl",a:"Sufjan Stevens & Angelo De Augustine",l:"A Beginner's Mind"},
+{y:2021,p:"tyler",a:"Vijay Iyer / Linda May Han Oh / Tyshawn Sorey",l:"Uneasy"},{y:2021,p:"tyler",a:"Floating Points / Pharoah Sanders / LSO",l:"Promises"},{y:2021,p:"tyler",a:"The Weather Station",l:"Ignorance"},{y:2021,p:"tyler",a:"Low",l:"HEY WHAT"},{y:2021,p:"tyler",a:"Nala Sinephro",l:"Space 1.8"},{y:2021,p:"tyler",a:"Vince Staples",l:"Vince Staples"},{y:2021,p:"tyler",a:"Japanese Breakfast",l:"Jubilee"},{y:2021,p:"tyler",a:"Squid",l:"Bright Green Field"},{y:2021,p:"tyler",a:"Spirit of the Beehive",l:"ENTERTAINMENT, DEATH"},
+{y:2021,p:"clint",a:"The War on Drugs",l:"I Don't Live Here Anymore"},{y:2021,p:"clint",a:"Tex Crick",l:"Live in New York City"},{y:2021,p:"clint",a:"Sufjan Stevens & Angelo De Augustine",l:"A Beginner's Mind"},{y:2021,p:"clint",a:"Andy Shauf",l:"Wilds"},{y:2021,p:"clint",a:"Cory Hanson",l:"Pale Horse Rider"},{y:2021,p:"clint",a:"Parquet Courts",l:"Sympathy for Life"},{y:2021,p:"clint",a:"Sam Evian",l:"Time to Melt"},{y:2021,p:"clint",a:"Natalie Bergman",l:"Mercy"},{y:2021,p:"clint",a:"Kacey Musgraves",l:"star-crossed"},
+{y:2021,p:"brian",a:"Floating Points / Pharoah Sanders / LSO",l:"Promises",r:1,n:"Cool jazz, many nights to sleep"},{y:2021,p:"brian",a:"Jazmine Sullivan",l:"Heaux Tales",r:2},{y:2021,p:"brian",a:"Jon Hopkins",l:"Music for Psychedelic Therapy",r:3},{y:2021,p:"brian",a:"Julius Eastman / wild Up",l:"Julius Eastman Vol. 1: Feminine",r:4},{y:2021,p:"brian",a:"PinkPantheress",l:"to hell with it",r:5,n:"Cool witch music"},{y:2021,p:"brian",a:"Helado Negro",l:"Far In",r:6},{y:2021,p:"brian",a:"Nala Sinephro",l:"Space 1.8",r:7},{y:2021,p:"brian",a:"Andy Shauf",l:"Wilds",r:8},{y:2021,p:"brian",a:"Sufjan Stevens & Angelo De Augustine",l:"A Beginner's Mind",r:9},{y:2021,p:"brian",a:"Japanese Breakfast",l:"Jubilee",r:10},{y:2021,p:"brian",a:"Field Medic",l:"Plunge Deep Golden Knife",r:11},{y:2021,p:"brian",a:"Snail Mail",l:"Valentine",r:12},{y:2021,p:"brian",a:"The War on Drugs",l:"I Don't Live Here Anymore",r:13},
+// ═══ 2022 ═══
+{y:2022,p:"brian",a:"Yaya Bey",l:"Remember your North Star"},{y:2022,p:"brian",a:"Big Thief",l:"Dragon New Warm Mountain I Believe in You",n:"Epic kaleidoscope. Favorite Big Thief"},{y:2022,p:"brian",a:"Alex G",l:"God Save the Animals"},{y:2022,p:"brian",a:"Sudan Archives",l:"Natural Brown Prom Queen"},{y:2022,p:"brian",a:"Sasami",l:"Squeeze"},{y:2022,p:"brian",a:"R.A.P. Ferreira",l:"5 to the Eyes with Stars"},{y:2022,p:"brian",a:"Nilufer Yanya",l:"Painless",n:"Heartbreaking lyrics"},{y:2022,p:"brian",a:"Ari Lennox",l:"Age/Sex/Location"},{y:2022,p:"brian",a:"Aldous Harding",l:"Warm Chris"},{y:2022,p:"brian",a:"Florist",l:"Florist"},{y:2022,p:"brian",a:"Black Country, New Road",l:"Ants From Up Here"},{y:2022,p:"brian",a:"Jockstrap",l:"I Love You Jennifer B"},{y:2022,p:"brian",a:"Angel Olsen",l:"Big Time"},{y:2022,p:"brian",a:"Steve Lacy",l:"Gemini Rights"},
+{y:2022,p:"tyler",a:"Destroyer",l:"Labyrinthitis"},{y:2022,p:"tyler",a:"The Smile",l:"A Light for Attracting Attention"},{y:2022,p:"tyler",a:"Alex G",l:"God Save the Animals"},{y:2022,p:"tyler",a:"Black Country, New Road",l:"Ants from Up There"},{y:2022,p:"tyler",a:"Kendrick Lamar",l:"Mr. Morale & The Big Steppers"},{y:2022,p:"tyler",a:"Earl Sweatshirt",l:"Sick!"},{y:2022,p:"tyler",a:"Alabaster DePlume",l:"Gold"},{y:2022,p:"tyler",a:"Kurt Vile",l:"(watch my moves)"},{y:2022,p:"tyler",a:"MJ Lenderman",l:"Boat Songs"},{y:2022,p:"tyler",a:"Cate Le Bon",l:"Pompeii"},{y:2022,p:"tyler",a:"black midi",l:"Hellfire"},{y:2022,p:"tyler",a:"Alvvays",l:"Blue Rev"},{y:2022,p:"tyler",a:"Oso Oso",l:"Sore Thumb"},{y:2022,p:"tyler",a:"Jeff Parker",l:"Forfolks"},
+{y:2022,p:"huston",a:"Orville Peck",l:"Bronco",r:1},{y:2022,p:"huston",a:"Pusha T",l:"It's Almost Dry",r:2},{y:2022,p:"huston",a:"Megan Thee Stallion",l:"Traumazine",r:3},{y:2022,p:"huston",a:"Josh Hedley",l:"Neon Blue",r:4},{y:2022,p:"huston",a:"JID",l:"The Forever Story",r:5},{y:2022,p:"huston",a:"Tobe Nwigwe",l:"moMINTS",r:6},{y:2022,p:"huston",a:"Freddie Gibbs",l:"Soul Sold Separately",r:7},{y:2022,p:"huston",a:"The Beths",l:"Expert in a Dying Field",r:8},{y:2022,p:"huston",a:"Wet Leg",l:"Wet Leg",r:9},{y:2022,p:"huston",a:"Lost Dog Street Band",l:"Glory",r:10},{y:2022,p:"huston",a:"Ian Noe",l:"River Fools & Mountain Saints",r:11},{y:2022,p:"huston",a:"Nilufer Yanya",l:"Painless",r:12},{y:2022,p:"huston",a:"Benjamin Todd",l:"Songs I Swore I'd Never Sing",r:13},
+{y:2022,p:"clint",a:"Dehd",l:"Blue Skies"},{y:2022,p:"clint",a:"Aldous Harding",l:"Warm Chris"},{y:2022,p:"clint",a:"Big Thief",l:"Dragon New Warm Mountain I Believe In You"},{y:2022,p:"clint",a:"Kurt Vile",l:"(watch my moves)"},{y:2022,p:"clint",a:"MJ Lenderman",l:"Boat Songs"},{y:2022,p:"clint",a:"Alvvays",l:"Blue Rev"},{y:2022,p:"clint",a:"Izaak Opatz",l:"Extra Medium"},{y:2022,p:"clint",a:"Kendrick Lamar",l:"Mr. Morale & The Big Steppers"},{y:2022,p:"clint",a:"Cate Le Bon",l:"Pompeii"},{y:2022,p:"clint",a:"Andrew Bird",l:"Inside Problems"},{y:2022,p:"clint",a:"S.G. Goodman",l:"Teeth Marks"},
+{y:2022,p:"taylor",a:"Big Thief",l:"Dragon New Warm Mountain I Believe In You",n:"A masterpiece. Change is one of the best songs ever"},{y:2022,p:"taylor",a:"Alvvays",l:"Blue Rev"},{y:2022,p:"taylor",a:"Dehd",l:"Blue Skies"},{y:2022,p:"taylor",a:"Orville Peck",l:"Bronco"},{y:2022,p:"taylor",a:"Goose",l:"Dripfield",n:"Favorite live act"},{y:2022,p:"taylor",a:"The Beths",l:"Expert In A Dying Field"},{y:2022,p:"taylor",a:"Florist",l:"Florist"},{y:2022,p:"taylor",a:"Andrew Bird",l:"Inside Problems"},{y:2022,p:"taylor",a:"The Smile",l:"A Light For Attracting Attention"},{y:2022,p:"taylor",a:"Spoon",l:"Lucifer on the Sofa"},{y:2022,p:"taylor",a:"Kendrick Lamar",l:"Mr. Morale & The Big Steppers"},{y:2022,p:"taylor",a:"Nilufer Yanya",l:"Painless"},{y:2022,p:"taylor",a:"Kevin Morby",l:"This is a Photograph"},{y:2022,p:"taylor",a:"Wet Leg",l:"Wet Leg"},
+{y:2022,p:"earl",a:"Nilufer Yanya",l:"Painless"},{y:2022,p:"earl",a:"Angel Olsen",l:"Big Time"},{y:2022,p:"earl",a:"Yeah Yeah Yeahs",l:"Cool It Down"},{y:2022,p:"earl",a:"Alvvays",l:"Blue Rev"},{y:2022,p:"earl",a:"Arctic Monkeys",l:"The Car"},{y:2022,p:"earl",a:"Wet Leg",l:"Wet Leg"},{y:2022,p:"earl",a:"Special Interest",l:"Endure"},{y:2022,p:"earl",a:"The Smile",l:"A Light for Attracting Attention"},{y:2022,p:"earl",a:"Kevin Morby",l:"This Is A Photograph"},{y:2022,p:"earl",a:"Ty Segall",l:"Hello, Hi"},{y:2022,p:"earl",a:"Kendrick Lamar",l:"Mr. Morale & the Big Steppers"},{y:2022,p:"earl",a:"MJ Lenderman",l:"Boat Songs"},{y:2022,p:"earl",a:"Big Thief",l:"Dragon New Warm Mountain I Believe in You"},{y:2022,p:"earl",a:"Djo",l:"DECIDE"},
+{y:2022,p:"paul",a:"Alvvays",l:"Blue Rev"},{y:2022,p:"paul",a:"Angel Olsen",l:"Big Time"},{y:2022,p:"paul",a:"Kikagaku Moyo",l:"Kumoyo Island"},{y:2022,p:"paul",a:"Minami Deutsch",l:"Fortune Goodies"},{y:2022,p:"paul",a:"Wand",l:"Spiders in the Rain"},{y:2022,p:"paul",a:"Elkhorn",l:"Distances"},{y:2022,p:"paul",a:"Spiritualized",l:"Everything was Beautiful"},{y:2022,p:"paul",a:"Matthew J. Rolin",l:"Passing"},
+// ═══ 2023 ═══
+{y:2023,p:"huston",a:"Lewis Capaldi",l:"Broken by Desire to be Heavenly Sent"},{y:2023,p:"huston",a:"Bully",l:"Lucky For You"},{y:2023,p:"huston",a:"Nas",l:"King's Disease III"},{y:2023,p:"huston",a:"Cut Worms",l:"Cut Worms"},{y:2023,p:"huston",a:"Blondshell",l:"Blondshell",n:"Listened to this the most"},{y:2023,p:"huston",a:"King Gizzard",l:"PetroDragonic Apocalypse"},{y:2023,p:"huston",a:"Lydia Loveless",l:"Nothing's Gonna Stand In My Way Again"},{y:2023,p:"huston",a:"Stephen Wilson Jr",l:"Son of Dad"},
+{y:2023,p:"taylor",a:"Andre 3000",l:"New Blue Sun",n:"Jazz with flutes. What a pivot"},{y:2023,p:"taylor",a:"Andy Shauf",l:"Norm",n:"Most listened to. Concept album, genius"},{y:2023,p:"taylor",a:"Cut Worms",l:"Cut Worms"},{y:2023,p:"taylor",a:"Dean Johnson",l:"Nothing For Me, Please"},{y:2023,p:"taylor",a:"Joanna Sternberg",l:"I Got Me"},{y:2023,p:"taylor",a:"Mac DeMarco",l:"Five Easy Hotdogs"},{y:2023,p:"taylor",a:"MJ Lenderman",l:"And the Wind (Live and Loose!)"},{y:2023,p:"taylor",a:"Slow Pulp",l:"Yard"},{y:2023,p:"taylor",a:"Sufjan Stevens",l:"Javelin",n:"Probably AOTY"},{y:2023,p:"taylor",a:"Wednesday",l:"Rat Saw God",n:"Best body of work all year"},
+{y:2023,p:"earl",a:"Indigo De Souza",l:"All of This Will End",r:1},{y:2023,p:"earl",a:"Wednesday",l:"Rat Saw God",r:2},{y:2023,p:"earl",a:"Ratboys",l:"The Window",r:3},{y:2023,p:"earl",a:"Bully",l:"Lucky for You",r:4},{y:2023,p:"earl",a:"Jamila Woods",l:"Water Made Us",r:5},{y:2023,p:"earl",a:"Queens of the Stone Age",l:"In Times New Roman",r:6},{y:2023,p:"earl",a:"Lana Del Rey",l:"Tunnel Under Ocean Blvd",r:7},{y:2023,p:"earl",a:"Cory Hanson",l:"Western Cum",r:8},{y:2023,p:"earl",a:"The Kills",l:"God Games",r:9},{y:2023,p:"earl",a:"Beach Fossils",l:"Bunny",r:10},
+{y:2023,p:"paul",a:"Ratboys",l:"The Window",r:1},{y:2023,p:"paul",a:"Cory Hanson",l:"Western Cum",r:2},{y:2023,p:"paul",a:"William Tyler",l:"Secret Stratosphere",r:3},{y:2023,p:"paul",a:"Geese",l:"3D Country",r:4,n:"Punk, country, lounge. Indescribable"},{y:2023,p:"paul",a:"Danny Paul Grody",l:"Arc of Day",r:5},{y:2023,p:"paul",a:"Hayden Pedigo",l:"The Happiest Times I Ever Ignored",r:6},{y:2023,p:"paul",a:"Rose City Band",l:"Garden Party",r:7},{y:2023,p:"paul",a:"Maya Ongaku",l:"Approach to Anima",r:8},{y:2023,p:"paul",a:"Bobby Lee",l:"Endless Skyways",r:9},{y:2023,p:"paul",a:"Frankie and the Witch Fingers",l:"Data Doom",r:10},
+{y:2023,p:"brian",a:"Sufjan Stevens",l:"Javelin",r:1,n:"All time fav Sufjan songs"},{y:2023,p:"brian",a:"Bully",l:"Lucky for You",r:2},{y:2023,p:"brian",a:"Andre 3000",l:"New Blue Sun",r:3},{y:2023,p:"brian",a:"Youth Lagoon",l:"Heaven is a Junkyard",r:4},{y:2023,p:"brian",a:"Water From Your Eyes",l:"Everyone's Crushed",r:5,n:"Makes me feel cooler"},{y:2023,p:"brian",a:"Arlo Parks",l:"My Soft Machine"},{y:2023,p:"brian",a:"Mitski",l:"The Land is Inhospitable"},{y:2023,p:"brian",a:"Olivia Rodrigo",l:"Guts"},{y:2023,p:"brian",a:"Janelle Monae",l:"The Age of Pleasure"},{y:2023,p:"brian",a:"Noname",l:"Sundial"},{y:2023,p:"brian",a:"Paramore",l:"This is Why"},{y:2023,p:"brian",a:"yeule",l:"softscars"},
+// ═══ 2024 ═══
+{y:2024,p:"tyler",a:"Charli xcx",l:"Brat (remix)",t:"Mean Girls ft. Julian Casablancas"},{y:2024,p:"tyler",a:"Father John Misty",l:"Mahashmashana"},{y:2024,p:"tyler",a:"Jeff Parker",l:"The Way out of Easy"},{y:2024,p:"tyler",a:"MJ Lenderman",l:"Manning Fireworks",t:"She's Leaving You"},{y:2024,p:"tyler",a:"Mount Eerie",l:"Night Palace"},{y:2024,p:"tyler",a:"Vampire Weekend",l:"Only God Was Above Us"},
+{y:2024,p:"huston",a:"Tyler, The Creator",l:"Chromakopia",r:1},{y:2024,p:"huston",a:"Kendrick Lamar",l:"GNX",r:2},{y:2024,p:"huston",a:"Orville Peck",l:"Stampede",r:3},{y:2024,p:"huston",a:"John Moreland",l:"Visitor",r:4},{y:2024,p:"huston",a:"Beyonce",l:"Cowboy Carter",r:5,n:"This album fuks"},{y:2024,p:"huston",a:"Johnny Blue Skies",l:"Passage Du Desir",r:6},{y:2024,p:"huston",a:"Charley Crockett",l:"$10 Cowboy",r:7},{y:2024,p:"huston",a:"Molly Tuttle",l:"Into The Wild",r:8},{y:2024,p:"huston",a:"Zach Top",l:"Cold Beer & Country Music",r:9},{y:2024,p:"huston",a:"Gillian Welch",l:"Woodland",r:10},
+{y:2024,p:"earl",a:"Nilufer Yanya",l:"My Method Actor",r:1},{y:2024,p:"earl",a:"MJ Lenderman",l:"Manning Fireworks",r:2},{y:2024,p:"earl",a:"Waxahatchee",l:"Tigers Blood",r:3},{y:2024,p:"earl",a:"IDLES",l:"TANGK",r:4},{y:2024,p:"earl",a:"Mannequin Pussy",l:"I Got Heaven",r:5},{y:2024,p:"earl",a:"Good Looks",l:"Lived Here For A While",r:6},{y:2024,p:"earl",a:"Fontaines D.C.",l:"Romance",r:7},{y:2024,p:"earl",a:"Porridge Radio",l:"Clouds In The Sky",r:8},{y:2024,p:"earl",a:"Jack White",l:"No Name",r:9},{y:2024,p:"earl",a:"Jason Isbell",l:"Weathervanes",r:10},{y:2024,p:"earl",a:"Good Morning",l:"Good Morning Seven",r:11},{y:2024,p:"earl",a:"Chappell Roan",l:"Midwest Princess"},
+{y:2024,p:"taylor",a:"Bon Iver",l:"SABLE",f:true},{y:2024,p:"taylor",a:"Kendrick Lamar",l:"gnx",f:true},{y:2024,p:"taylor",a:"Vampire Weekend",l:"Only God Was Above Us",f:true},{y:2024,p:"taylor",a:"Jack White",l:"No Name",f:true},{y:2024,p:"taylor",a:"Waxahatchee",l:"Tigers Blood",f:true},{y:2024,p:"taylor",a:"BigXThaPlug",l:"TAKE CARE"},{y:2024,p:"taylor",a:"Billy Strings",l:"Highway Prayers"},{y:2024,p:"taylor",a:"The Decemberists",l:"As it Ever Was, So It Will Be Again"},{y:2024,p:"taylor",a:"Dehd",l:"Poetry"},{y:2024,p:"taylor",a:"Ducks Ltd",l:"Harm's Way"},{y:2024,p:"taylor",a:"Father John Misty",l:"Mahashmashana"},{y:2024,p:"taylor",a:"Sierra Ferrell",l:"Trail of Flowers"},{y:2024,p:"taylor",a:"Futurebirds",l:"Easy Company"},{y:2024,p:"taylor",a:"Haley Heyndreckx",l:"Seed of a Seed"},{y:2024,p:"taylor",a:"Hurray For the Riff Raff",l:"The Past Is Still Alive"},{y:2024,p:"taylor",a:"Jason Isbell",l:"Weathervanes"},{y:2024,p:"taylor",a:"Johnny Blue Skies",l:"Passage Du Desir"},{y:2024,p:"taylor",a:"Adrianne Lenker",l:"Bright Future"},{y:2024,p:"taylor",a:"MJ Lenderman",l:"Manning Fireworks"},{y:2024,p:"taylor",a:"Kacey Musgraves",l:"Deeper Well"},{y:2024,p:"taylor",a:"Orebolo",l:"The Chateau"},{y:2024,p:"taylor",a:"Jessica Pratt",l:"Here in the Pitch"},{y:2024,p:"taylor",a:"Nala Sinephro",l:"Endlessness"},{y:2024,p:"taylor",a:"The Smile",l:"Cutouts"},
+{y:2024,p:"paul",a:"Jack White",l:"No Name",r:1},{y:2024,p:"paul",a:"Ducks Ltd.",l:"Harm's Way",r:2},{y:2024,p:"paul",a:"Jessica Pratt",l:"Here in the Pitch",r:3},{y:2024,p:"paul",a:"Fuubutsushi",l:"Meridians",r:4},{y:2024,p:"paul",a:"Wand",l:"Vertigo",r:5},{y:2024,p:"paul",a:"Cassini",l:"The Cassini Promise",r:6},{y:2024,p:"paul",a:"Somesurprises",l:"Perseids",r:7},{y:2024,p:"paul",a:"Winged Wheel",l:"Big Hotel",r:8},{y:2024,p:"paul",a:"Rosali",l:"Bite Down",r:9},{y:2024,p:"paul",a:"Color Green",l:"Fool's Parade",r:10},{y:2024,p:"paul",a:"The Bures Band",l:"Fool Circle",r:11},
+// ═══ 2025 ═══
+{y:2025,p:"robert",a:"Nourished by Time",l:"The Passionate Ones",r:1},{y:2025,p:"robert",a:"Geese",l:"Getting Killed",r:2},{y:2025,p:"robert",a:"Oklou",l:"Choke Enough",r:3},{y:2025,p:"robert",a:"Teethe",l:"Magic of the Sale",r:4},{y:2025,p:"robert",a:"Alex G",l:"Headlights",r:5},{y:2025,p:"robert",a:"Viagra Boys",l:"viagr aboys",r:6},{y:2025,p:"robert",a:"Ela Minus",l:"DIA",r:7},{y:2025,p:"robert",a:"Panda Bear",l:"Sinister Grift",r:9},{y:2025,p:"robert",a:"Oneohtrix Point Never",l:"Tranquilizer",r:10},{y:2025,p:"robert",a:"tagabow",l:"LOTTO",r:11},{y:2025,p:"robert",a:"shallowater",l:"Gods Gonna Give You a Million Dollars",r:12},{y:2025,p:"robert",a:"goon",l:"Dream 3",r:13},{y:2025,p:"robert",a:"twen",l:"Fate Euphoric",r:14},{y:2025,p:"robert",a:"Getdown Services",l:"Primordial Slot Machine",r:15},
+{y:2025,p:"taylor",a:"Bon Iver",l:"Sable Fable"},{y:2025,p:"taylor",a:"Cameron Winter",l:"Heavy Metal",f:true},{y:2025,p:"taylor",a:"Dean Johnson",l:"I Hope We Can Still Be Friends"},{y:2025,p:"taylor",a:"Dijon",l:"Baby",f:true},{y:2025,p:"taylor",a:"Geese",l:"Getting Killed",f:true},{y:2025,p:"taylor",a:"Goose",l:"Chain Yer Dragon"},{y:2025,p:"taylor",a:"Jason Isbell",l:"Foxes in the Snow"},{y:2025,p:"taylor",a:"Panda Bear",l:"Sinister Grift"},{y:2025,p:"taylor",a:"Saya Gray",l:"SAYA",f:true},{y:2025,p:"taylor",a:"Sharp Pins",l:"Radio DDR"},{y:2025,p:"taylor",a:"This is Lorelei",l:"Holo Boy"},{y:2025,p:"taylor",a:"Tyler, The Creator",l:"DON'T TAP THE GLASS"},{y:2025,p:"taylor",a:"Wednesday",l:"Bleeds",f:true},
+{y:2025,p:"earl",a:"Wednesday",l:"Bleeds",r:1},{y:2025,p:"earl",a:"Blondshell",l:"If You Asked For A Picture",r:2},{y:2025,p:"earl",a:"Water From Your Eyes",l:"It's a Beautiful Place",r:3},{y:2025,p:"earl",a:"Samia",l:"Bloodless",r:4},{y:2025,p:"earl",a:"Indigo De Souza",l:"Precipice",r:5},{y:2025,p:"earl",a:"Jason Isbell",l:"Foxes in the Snow",r:6},{y:2025,p:"earl",a:"Greg Freeman",l:"Burnover",r:7},{y:2025,p:"earl",a:"Viagra Boys",l:"viagr aboys",r:8},{y:2025,p:"earl",a:"The Beths",l:"Straight Line Was A Lie",r:9},{y:2025,p:"earl",a:"Geese",l:"Getting Killed",r:10},{y:2025,p:"earl",a:"twen",l:"Fate Euphoric",r:11},
+{y:2025,p:"huston",a:"Clipse",l:"Let God Sort Em Out",r:1},{y:2025,p:"huston",a:"Tyler, The Creator",l:"Don't Tap The Glass",r:2},{y:2025,p:"huston",a:"Kendrick Lamar",l:"GNX",r:3},{y:2025,p:"huston",a:"Jason Isbell",l:"Foxes in the Snow",r:4},{y:2025,p:"huston",a:"Saba & No ID",l:"From the Private Collection",r:5},{y:2025,p:"huston",a:"Bad Bunny",l:"DeBi TiRAR MaS FOToS",r:6},{y:2025,p:"huston",a:"Zach Top",l:"Ain't In It For My Health",r:7},{y:2025,p:"huston",a:"Joshua Hedley",l:"All Hat",r:8},{y:2025,p:"huston",a:"Julien Baker / TORRES",l:"Send a Prayer My Way",r:9},
+];
+
+// ═══ ALBUM ART — MusicBrainz + Cover Art Archive ═══
+// Free, no API key, CORS-friendly from browsers
+// Rate-limited queue (1 req per 1.2s for MusicBrainz)
+// localStorage cache so covers only fetch once ever
+
+const COVER_CACHE_PREFIX = 'mna_cover_';
+const MB_USER_AGENT = 'MusicNerdsArchive/1.0 (taa121288@gmail.com)';
+
+// --- localStorage cache layer ---
+function cacheGet(artist, album) {
+  try {
+    const key = COVER_CACHE_PREFIX + (artist + '|||' + album).toLowerCase();
+    return localStorage.getItem(key);
+  } catch(e) { return null; }
+}
+function cacheSet(artist, album, url) {
+  try {
+    const key = COVER_CACHE_PREFIX + (artist + '|||' + album).toLowerCase();
+    localStorage.setItem(key, url);
+  } catch(e) {}
+}
+
+// --- Procedural SVG fallback ---
+function makeCoverSvg(artist, album) {
+  const h = (artist+album).split("").reduce((a,c) => a+c.charCodeAt(0), 0);
+  const h1=h%360, h2=(h*7)%360;
+  const initials = artist.split(/\s+/).map(w=>w[0]||'').slice(0,2).join('').toUpperCase();
+  const pats = [
+    `<rect width="100" height="100" fill="hsl(${h1},45%,32%)"/><circle cx="50" cy="50" r="30" fill="hsl(${h2},50%,50%)" opacity=".6"/><text x="50" y="56" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="22" font-family="sans-serif" font-weight="700">${initials}</text>`,
+    `<rect width="100" height="100" fill="hsl(${h1},40%,25%)"/><rect x="10" y="10" width="80" height="80" rx="40" fill="hsl(${h2},45%,45%)"/><text x="50" y="56" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="22" font-family="sans-serif" font-weight="700">${initials}</text>`,
+    `<rect width="50" height="50" fill="hsl(${h1},42%,34%)"/><rect x="50" y="50" width="50" height="50" fill="hsl(${h1},42%,34%)"/><rect x="50" width="50" height="50" fill="hsl(${h2},48%,48%)"/><rect y="50" width="50" height="50" fill="hsl(${h2},48%,48%)"/><text x="50" y="56" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="22" font-family="sans-serif" font-weight="700">${initials}</text>`,
+    `<defs><linearGradient id="g${h%999}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="hsl(${h1},45%,30%)"/><stop offset="100%" stop-color="hsl(${h2},50%,45%)"/></linearGradient></defs><rect width="100" height="100" fill="url(#g${h%999})"/><text x="50" y="56" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="22" font-family="sans-serif" font-weight="700">${initials}</text>`,
+  ];
+  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">${pats[h%4]}</svg>`;
+}
+
+// --- Rate-limited fetch queue for MusicBrainz ---
+const fetchQueue = [];
+let queueRunning = false;
+
+function enqueueCoverFetch(artist, album, elements) {
+  fetchQueue.push({ artist, album, elements });
+  if (!queueRunning) processQueue();
+}
+
+async function processQueue() {
+  queueRunning = true;
+  const total = fetchQueue.length;
+  let done = 0;
+  const statusEl = document.getElementById('coverStatus');
+  while (fetchQueue.length > 0) {
+    const job = fetchQueue.shift();
+    done++;
+    if (statusEl) statusEl.textContent = `Loading album art ${done}/${total+done-1}... `;
+    try {
+      await fetchAndApplyCover(job.artist, job.album, job.elements);
+    } catch(e) {}
+    // Rate limit: 1.2s between MusicBrainz requests
+    await new Promise(r => setTimeout(r, 1200));
+  }
+  if (statusEl) statusEl.textContent = '';
+  queueRunning = false;
+}
+
+async function fetchAndApplyCover(artist, album, elements) {
+  // Step 1: Search MusicBrainz for release-group MBID
+  const query = encodeURIComponent(`releasegroup:"${album}" AND artist:"${artist}"`);
+  const mbUrl = `https://musicbrainz.org/ws/2/release-group/?query=${query}&fmt=json&limit=3`;
+  
+  const mbResp = await fetch(mbUrl, {
+    headers: { 'User-Agent': MB_USER_AGENT }
+  });
+  
+  if (!mbResp.ok) {
+    cacheSet(artist, album, 'NONE');
+    return;
+  }
+  
+  const mbData = await mbResp.json();
+  const rgs = mbData['release-groups'] || [];
+  
+  if (rgs.length === 0) {
+    cacheSet(artist, album, 'NONE');
+    return;
+  }
+  
+  // Find best match — prefer artist name match
+  let bestRg = rgs[0];
+  const artistLower = artist.toLowerCase();
+  for (const rg of rgs) {
+    const credits = rg['artist-credit'] || [];
+    for (const credit of credits) {
+      if (credit.name && credit.name.toLowerCase() === artistLower) {
+        bestRg = rg;
+        break;
+      }
+    }
+  }
+  
+  const mbid = bestRg.id;
+  
+  // Step 2: Get cover art from Cover Art Archive
+  const coverUrl = `https://coverartarchive.org/release-group/${mbid}/front-250`;
+  
+  // Test if image exists (CAA redirects to the actual image)
+  try {
+    const imgResp = await fetch(coverUrl, { method: 'HEAD' });
+    if (imgResp.ok || imgResp.redirected) {
+      // The URL works — cache and apply
+      const finalUrl = imgResp.url || coverUrl;
+      cacheSet(artist, album, finalUrl);
+      applyImage(elements, finalUrl, artist, album);
+      return;
+    }
+  } catch(e) {
+    // HEAD failed, try loading directly — some CORS configs only allow GET
+    cacheSet(artist, album, coverUrl);
+    applyImage(elements, coverUrl, artist, album);
+    return;
+  }
+  
+  cacheSet(artist, album, 'NONE');
+}
+
+function applyImage(elements, url, artist, album) {
+  const fallbackSvg = makeCoverSvg(artist, album).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  elements.forEach(el => {
+    el.innerHTML = `<img src="${url}" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.parentElement.innerHTML='${fallbackSvg}'">`;
+    el.dataset.loaded = 'true';
+  });
+}
+
+// --- Main cover HTML generator ---
+function makeCover(artist, album, size) {
+  const cached = cacheGet(artist, album);
+  if (cached && cached !== 'NONE') {
+    // Cached image — render immediately
+    return `<div class="cover" style="width:${size}px;height:${size}px;min-width:${size}px" data-loaded="true"><img src="${cached}" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.parentElement.innerHTML='${makeCoverSvg(artist,album).replace(/'/g,"\\'").replace(/"/g,'&quot;')}'"></div>`;
+  }
+  // No cache or NONE — show fallback, queue fetch if not NONE
+  const fallback = makeCoverSvg(artist, album);
+  return `<div class="cover" style="width:${size}px;height:${size}px;min-width:${size}px" data-artist="${artist.replace(/"/g,'&amp;quot;')}" data-album="${album.replace(/"/g,'&amp;quot;')}">${fallback}</div>`;
+}
+
+// --- Scan visible covers and queue fetches ---
+function loadCovers() {
+  const covers = document.querySelectorAll('.cover[data-artist]:not([data-loaded])');
+  const unique = {};
+  covers.forEach(c => {
+    const artist = c.dataset.artist.replace(/&quot;/g, '"');
+    const album = c.dataset.album.replace(/&quot;/g, '"');
+    const key = artist + '|||' + album;
+    
+    // Check cache first
+    const cached = cacheGet(artist, album);
+    if (cached === 'NONE') {
+      c.dataset.loaded = 'true'; // Don't retry
+      return;
+    }
+    if (cached) {
+      applyImage([c], cached, artist, album);
+      return;
+    }
+    
+    if (!unique[key]) unique[key] = { artist, album, elements: [] };
+    unique[key].elements.push(c);
+  });
+  
+  // Queue uncached fetches
+  Object.values(unique).forEach(job => {
+    enqueueCoverFetch(job.artist, job.album, job.elements);
+  });
+}
+
+function makeBadge(pid) {
+  const p = PEOPLE[pid]; if (!p) return '';
+  return `<span class="badge" style="background:${p.color}18;border:1px solid ${p.color}40;color:${p.color}"><span class="dot" style="background:${p.color}"></span>${p.short}</span>`;
+}
+
+function makePickCard(pick, showPerson, showYear) {
+  const rk = pick.r ? `<span class="rank">#${pick.r}</span> ` : '';
+  const t5 = pick.f ? ' <span class="top5">TOP 5</span>' : '';
+  const tr = pick.t ? `<div class="track">♪ ${pick.t}</div>` : '';
+  const nt = pick.n ? `<div class="note">${pick.n.length>90?pick.n.slice(0,90)+'...':pick.n}</div>` : '';
+  const pe = showPerson ? makeBadge(pick.p) : '';
+  const yr = showYear ? `<span style="font-size:9px;color:rgba(255,255,255,0.2);font-family:monospace">${pick.y}</span>` : '';
+  return `<div class="pick-card">${makeCover(pick.a, pick.l, 44)}<div class="info"><div>${rk}<span class="album-name">${pick.l}</span>${t5}</div><div class="artist-name">${pick.a}</div>${tr}${nt}<div class="meta">${pe}${yr}</div></div></div>`;
+}
+
+// ═══ ANALYTICS ═══
+function computeAnalytics() {
+  const ak = p => p.a+'|||'+p.l;
+  const am = {}; PICKS.forEach(p => { const k=ak(p); if(!am[k]) am[k]={a:p.a,l:p.l,pp:new Set(),yy:new Set()}; am[k].pp.add(p.p); am[k].yy.add(p.y); });
+  const con = Object.values(am).map(a=>({a:a.a,l:a.l,pp:[...a.pp],yy:[...a.yy],c:a.pp.size})).filter(a=>a.c>1).sort((a,b)=>b.c-a.c);
+  const artMap = {}; PICKS.forEach(p => { if(!artMap[p.a]) artMap[p.a]={a:p.a,pp:new Set(),c:0,yy:new Set(),albums:new Set()}; artMap[p.a].pp.add(p.p); artMap[p.a].c++; artMap[p.a].yy.add(p.y); artMap[p.a].albums.add(p.l); });
+  const ta = Object.values(artMap).map(a=>({...a,pp:[...a.pp],yy:[...a.yy],albums:[...a.albums]})).sort((a,b)=>b.c-a.c);
+  const allPeople = [...new Set(PICKS.map(p=>p.p))];
+  const stats = allPeople.map(pid=>({p:pid,t:PICKS.filter(x=>x.p===pid).length,yy:[...new Set(PICKS.filter(x=>x.p===pid).map(x=>x.y))].sort()})).sort((a,b)=>b.t-a.t);
+  const ov = {}; allPeople.forEach(p1=>{ov[p1]={};const s1=new Set(PICKS.filter(x=>x.p===p1).map(ak));allPeople.forEach(p2=>{if(p1===p2){ov[p1][p2]=s1.size;return;}const s2=new Set(PICKS.filter(x=>x.p===p2).map(ak));let c=0;s1.forEach(a=>{if(s2.has(a))c++;});ov[p1][p2]=c;});});
+  
+  // Unique picks per person (albums only they picked)
+  const uniquePicks = {};
+  allPeople.forEach(pid => {
+    const myAlbums = PICKS.filter(x=>x.p===pid).map(ak);
+    const unique = myAlbums.filter(k => {
+      const entry = am[k];
+      return entry && entry.pp.size === 1;
+    });
+    uniquePicks[pid] = unique.length;
+  });
+  
+  // Year-over-year participation
+  const yearParticipation = {};
+  [2020,2021,2022,2023,2024,2025].forEach(y => {
+    yearParticipation[y] = [...new Set(PICKS.filter(p=>p.y===y).map(p=>p.p))].length;
+  });
+  
+  return {con,ta,stats,ov,allPeople,uniquePicks,yearParticipation};
+}
+const AN = computeAnalytics();
+
+// ═══ RENDER FUNCTIONS ═══
+function renderHome() {
+  const totalArtists = new Set(PICKS.map(p=>p.a)).size;
+  let html = `<div style="text-align:center;padding:28px 0 16px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:3px;color:rgba(255,255,255,0.2);margin-bottom:4px">Est. 2020 — Extracted from Gmail</div><h1 style="font-size:26px;font-weight:800">Music Nerds Archive</h1><p style="color:rgba(255,255,255,0.3);font-size:11px;margin-top:4px">${PICKS.length} picks · ${totalArtists} artists · ${AN.allPeople.length} nerds · 6 years</p></div>`;
+  html += `<div class="stat-grid"><div class="stat-box"><div class="val">${PICKS.length}</div><div class="label">Picks</div></div><div class="stat-box"><div class="val">${totalArtists}</div><div class="label">Artists</div></div><div class="stat-box"><div class="val">6</div><div class="label">Years</div></div><div class="stat-box"><div class="val">${AN.allPeople.length}</div><div class="label">Nerds</div></div></div>`;
+  html += `<h2 class="section-title">🤝 Albums Multiple Nerds Picked</h2>`;
+  AN.con.slice(0,15).forEach(item => {
+    html += `<div class="consensus-row">${makeCover(item.a,item.l,32)}<div class="c-info"><div class="c-album">${item.l}</div><div class="c-artist">${item.a} — ${item.yy.join(', ')}</div></div><div class="c-badges">${item.pp.map(pid=>makeBadge(pid)).join('')}</div></div>`;
+  });
+  html += `<h2 class="section-title" style="margin-top:20px">📬 Thread Index</h2>`;
+  [{yr:2025,s:"Music Nerds - 2025",st:"✅ 4 lists"},{yr:2024,s:"Music Nerds - 2024",st:"✅ 5 lists"},{yr:2023,s:"Music Nerds - 2023",st:"✅ 5 lists"},{yr:2022,s:"End of Year 2022",st:"✅ 7 lists"},{yr:2021,s:"2021!",st:"✅ 7 lists"},{yr:2020,s:"Music Lists 2020",st:"✅ 6 lists"}].forEach(t => {
+    html += `<div class="thread-row"><span class="yr">${t.yr}</span><div style="flex:1"><div style="font-size:11px">${t.s}</div></div><span style="font-size:10px">${t.st}</span></div>`;
+  });
+  return html;
+}
+
+function renderYear(year) {
+  const yp = PICKS.filter(p=>p.y===year);
+  const people = [...new Set(yp.map(p=>p.p))];
+  let html = `<h2 style="font-size:22px;font-weight:800;padding-top:12px;margin-bottom:2px">${year}</h2><p style="color:rgba(255,255,255,0.25);font-size:11px;margin-bottom:16px">${people.length} contributors — ${yp.length} picks</p>`;
+  people.forEach(pid => {
+    const pp = yp.filter(p=>p.p===pid).sort((a,b)=>(a.r||999)-(b.r||999));
+    const person = PEOPLE[pid];
+    html += `<div class="section-person"><div class="sp-head"><span style="font-size:14px">${person.emoji}</span><span class="sp-name" style="color:${person.color}">${person.name}</span><span class="sp-count">(${pp.length})</span></div><div class="picks-list">${pp.map(pk=>makePickCard(pk,false,false)).join('')}</div></div>`;
+  });
+  return html;
+}
+
+function renderArtists() {
+  let html = `<h2 style="font-size:22px;font-weight:800;padding-top:12px;margin-bottom:4px">Artists</h2><p style="color:rgba(255,255,255,0.25);font-size:11px;margin-bottom:10px">${AN.ta.length} unique artists across 6 years</p>`;
+  html += `<input class="search-input" id="artistSearchInput" placeholder="Filter artists..." oninput="filterArtists()">`;
+  html += `<div id="artistList">`;
+  AN.ta.slice(0,80).forEach(art => {
+    html += `<div class="artist-card" style="margin-bottom:4px"><div style="flex:1"><div class="a-name">${art.a}</div><div class="a-meta">${art.c} pick${art.c>1?'s':''} · ${art.yy.join(', ')} · ${art.pp.map(pid=>makeBadge(pid)).join(' ')}</div><div style="font-size:9px;color:rgba(255,255,255,0.15);margin-top:2px">${art.albums.join(' · ')}</div></div></div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
+function filterArtists() {
+  const q = document.getElementById('artistSearchInput').value.toLowerCase();
+  const filtered = AN.ta.filter(art => !q || art.a.toLowerCase().includes(q));
+  let html = '';
+  filtered.slice(0,80).forEach(art => {
+    html += `<div class="artist-card" style="margin-bottom:4px"><div style="flex:1"><div class="a-name">${art.a}</div><div class="a-meta">${art.c} pick${art.c>1?'s':''} · ${art.yy.join(', ')} · ${art.pp.map(pid=>makeBadge(pid)).join(' ')}</div><div style="font-size:9px;color:rgba(255,255,255,0.15);margin-top:2px">${art.albums.join(' · ')}</div></div></div>`;
+  });
+  document.getElementById('artistList').innerHTML = html;
+}
+
+function renderSearch() {
+  return `<h2 style="font-size:22px;font-weight:800;padding-top:12px;margin-bottom:10px">Search</h2><input class="search-input" id="searchInput" placeholder="Search albums or artists..." oninput="doSearch()"><div id="searchResults" class="picks-list"></div>`;
+}
+function doSearch() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const res = PICKS.filter(p=>!q||p.l.toLowerCase().includes(q)||p.a.toLowerCase().includes(q));
+  document.getElementById('searchResults').innerHTML = res.slice(0,40).map(pk=>makePickCard(pk,true,true)).join('');
+  setTimeout(loadCovers, 100);
+}
+
+function renderPeople() {
+  let html = `<h2 style="font-size:22px;font-weight:800;padding-top:12px;margin-bottom:12px">Contributors</h2><div class="person-grid">`;
+  AN.allPeople.forEach(pid => {
+    const pp = PICKS.filter(p=>p.p===pid);
+    const years = [...new Set(pp.map(p=>p.y))].sort();
+    const artists = [...new Set(pp.map(p=>p.a))];
+    const person = PEOPLE[pid];
+    html += `<div class="person-card" style="border:1px solid ${person.color}20"><div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><span style="font-size:16px">${person.emoji}</span><div><div style="font-weight:700;font-size:12px">${person.name}</div><div style="font-size:9px;color:rgba(255,255,255,0.25)">${pp.length} picks — ${years.join(', ')}</div></div></div><div style="font-size:9px;color:rgba(255,255,255,0.2);line-height:1.3">${artists.slice(0,6).join(', ')}${artists.length>6?' +'+(artists.length-6):''}</div></div>`;
+  });
+  return html + `</div>`;
+}
+
+function renderStats() {
+  let html = `<h2 style="font-size:22px;font-weight:800;padding-top:12px;margin-bottom:12px">Analytics</h2>`;
+  
+  // Nerd Stats
+  html += `<h3 class="section-sub">Picks Per Nerd</h3>`;
+  AN.stats.forEach(s => {
+    const person = PEOPLE[s.p];
+    html += `<div class="nerd-bar">${makeBadge(s.p)}<div class="bar-bg"><div class="bar-fill" style="width:${Math.min((s.t/65)*100,100)}%;background:${person.color}"></div></div><span class="bar-label">${s.t} picks</span></div>`;
+  });
+  
+  // Participation by year
+  html += `<h3 class="section-sub" style="margin-top:16px">Participation by Year</h3>`;
+  [2020,2021,2022,2023,2024,2025].forEach(y => {
+    const people = [...new Set(PICKS.filter(p=>p.y===y).map(p=>p.p))];
+    html += `<div style="display:flex;align-items:center;gap:6px;padding:3px 0"><span style="font-family:monospace;font-weight:800;width:32px;font-size:12px">${y}</span><div style="display:flex;gap:2px;flex-wrap:wrap">${people.map(pid=>makeBadge(pid)).join('')}</div></div>`;
+  });
+  
+  // Uniqueness score
+  html += `<h3 class="section-sub" style="margin-top:16px">Uniqueness Score (albums only they picked)</h3>`;
+  Object.entries(AN.uniquePicks).sort((a,b)=>b[1]-a[1]).forEach(([pid,count]) => {
+    const total = PICKS.filter(x=>x.p===pid).length;
+    const pct = Math.round((count/total)*100);
+    html += `<div class="nerd-bar">${makeBadge(pid)}<div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${PEOPLE[pid].color}"></div></div><span class="bar-label">${pct}% unique</span></div>`;
+  });
+  
+  // Overlap table
+  html += `<h3 class="section-sub" style="margin-top:16px">Taste Overlap</h3><div style="overflow-x:auto;margin-bottom:16px"><table class="overlap-table"><thead><tr><th></th>`;
+  AN.allPeople.forEach(pid => { html += `<th style="color:${PEOPLE[pid].color}">${PEOPLE[pid].short}</th>`; });
+  html += `</tr></thead><tbody>`;
+  AN.allPeople.forEach(p1 => {
+    html += `<tr><td class="row-label" style="color:${PEOPLE[p1].color}">${PEOPLE[p1].short}</td>`;
+    AN.allPeople.forEach(p2 => {
+      const v = AN.ov[p1][p2]||0; const isDiag = p1===p2;
+      const color = isDiag?'rgba(255,255,255,0.12)':v>0?'#f0ece4':'rgba(255,255,255,0.06)';
+      const bg = isDiag?'transparent':v>3?'rgba(232,146,124,0.3)':v>1?'rgba(232,146,124,0.12)':v>0?'rgba(232,146,124,0.05)':'transparent';
+      html += `<td style="color:${color};background:${bg}">${v>0?v:'·'}</td>`;
+    });
+    html += `</tr>`;
+  });
+  html += `</tbody></table></div>`;
+  
+  // Genre tendencies
+  html += `<h3 class="section-sub">Who Listens to What</h3>`;
+  const tendencies = [
+    {p:"taylor",d:"Indie rock, folk, jam bands, singer-songwriters. Big Thief/Bon Iver evangelist. Goose convert."},
+    {p:"earl",d:"Alt-rock, indie, modern songwriters. Denver show scene encyclopedist. Nilufer Yanya + Wednesday champion."},
+    {p:"huston",d:"Wildcard king. Country ↔ rap ↔ pop ↔ metal. Orville Peck, Beyonce, Bad Bunny, and King Gizzard in one list."},
+    {p:"tyler",d:"Art rock, jazz, experimental. Pavement, Floating Points, Destroyer. The group's avant-garde wing."},
+    {p:"brian",d:"Indie, R&B, electronic, Sufjan deep cuts. Most diverse taste year over year. Minneapolis scene reporter."},
+    {p:"paul",d:"Krautrock, psych, Saharan rock, ambient folk. Nashville WXNA radio host. Most niche picks in the group."},
+    {p:"clint",d:"Indie rock, singer-songwriter, Nashville adjacent. Phoebe Bridgers, Andy Shauf, Taylor Swift (guilty pleasure)."},
+    {p:"danny",d:"Americana, country, blues, classic rock. The guy who introduced everyone to Sierra Ferrell."},
+    {p:"robert",d:"Electronic, art pop, experimental. The newest nerd with the most forward-looking taste."},
+  ];
+  tendencies.forEach(t => {
+    if (PEOPLE[t.p]) html += `<div class="insight"><div class="i-title">${PEOPLE[t.p].emoji} ${PEOPLE[t.p].name}</div><div class="i-desc">${t.d}</div></div>`;
+  });
+  
+  // Key insights
+  html += `<h3 class="section-sub" style="margin-top:16px">Key Insights (2020–2025)</h3>`;
+  [
+    {i:"🏆",t:"ALL-TIME RECORD: Alvvays Blue Rev (2022)",d:"Tyler, Clint, Taylor, Earl, AND Paul. 5 people — tied with Waxahatchee Saint Cloud (2020)."},
+    {i:"🎸",t:"Andy Shauf = Group GOAT",d:"Neon Skyline (2020, 3 picks) → Wilds (2021, 4 picks!) → Norm (2023). Most consistent consensus artist."},
+    {i:"🔥",t:"Kendrick Every Year",d:"RTJ4 collab (2020) → CMIYGL shoutout (2021) → Mr. Morale (2022, 4 picks) → GNX (2024-25). Never misses."},
+    {i:"🏅",t:"Wednesday Dynasty",d:"Taylor + Earl picked them in BOTH 2023 AND 2025. Earl recommended the group to listen in 2022."},
+    {i:"🎵",t:"Cory Hanson / Wand Through-Line",d:"2021 (Taylor+Earl+Clint) → 2022 (Paul, live album) → 2023 (Earl+Paul) → 2024 (Paul, Wand) → 2025 (Earl shoutout)."},
+    {i:"🌊",t:"MJ Lenderman's Rise",d:"2022: Tyler+Clint+Earl (Boat Songs). 2023: Taylor. 2024: Tyler+Earl+Taylor (Manning Fireworks). Asheville to everywhere."},
+    {i:"🤝",t:"Taylor+Earl = Taste Twins",d:"The highest overlap pair in the group. Shared picks in every single year from 2020 to 2025."},
+    {i:"📝",t:"Taylor = Most Prolific",d:"60+ picks across 6 years. Organizer, playlist curator, and the emotional heart of the group."},
+    {i:"🌈",t:"Huston's Range is Unmatched",d:"Lewis Capaldi → King Gizzard → Beyonce → Bad Bunny → Gay Country → Clipse. Identity crisis, great taste."},
+    {i:"🔄",t:"Cross-Pollination Network",d:"Danny→Taylor (Sierra Ferrell), Paul→Earl (Ratboys), Earl→group (Wednesday, MJ Lenderman), Brian→Taylor (Floating Points vinyl)."},
+    {i:"🎶",t:"Paul's Parallel Universe",d:"Krautrock, Saharan rock, Japanese psych, shoegaze. WXNA Nashville radio host. Most unique list every year."},
+    {i:"💿",t:"The Bully Thread",d:"Huston+Earl+Brian all picked Lucky for You (2023). Earl picked SUGAREGG (2020). Bully at UMS was legendary."},
+  ].forEach(ins => {
+    html += `<div class="insight"><div class="i-title">${ins.i} ${ins.t}</div><div class="i-desc">${ins.d}</div></div>`;
+  });
+  
+  return html;
+}
+
+// ═══ NAVIGATION ═══
+const TABS = [
+  {id:'home',label:'Home',icon:'◉'},
+  {id:'y2025',label:'2025',icon:'📅'},{id:'y2024',label:'2024',icon:'📅'},{id:'y2023',label:'2023',icon:'📅'},
+  {id:'y2022',label:'2022',icon:'📅'},{id:'y2021',label:'2021',icon:'📅'},{id:'y2020',label:'2020',icon:'📅'},
+  {id:'artists',label:'Artists',icon:'🎸'},
+  {id:'people',label:'People',icon:'👥'},
+  {id:'search',label:'Search',icon:'🔍'},
+  {id:'stats',label:'Stats',icon:'📊'},
+];
+let activeTab = 'home';
+
+function switchTab(tabId) {
+  activeTab = tabId;
+  document.querySelectorAll('nav button').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tabId);
+  });
+  const app = document.getElementById('app');
+  let content = '';
+  switch(tabId) {
+    case 'home': content = renderHome(); break;
+    case 'y2025': content = renderYear(2025); break;
+    case 'y2024': content = renderYear(2024); break;
+    case 'y2023': content = renderYear(2023); break;
+    case 'y2022': content = renderYear(2022); break;
+    case 'y2021': content = renderYear(2021); break;
+    case 'y2020': content = renderYear(2020); break;
+    case 'artists': content = renderArtists(); break;
+    case 'people': content = renderPeople(); break;
+    case 'search': content = renderSearch(); break;
+    case 'stats': content = renderStats(); break;
+  }
+  app.innerHTML = `<div class="view active" style="padding:0 14px 20px">${content}</div>`;
+  if (tabId === 'search') doSearch();
+  setTimeout(loadCovers, 50);
+  window.scrollTo(0, 0);
+}
+
+// Build nav
+const nav = document.getElementById('nav');
+TABS.forEach(tab => {
+  const btn = document.createElement('button');
+  btn.textContent = tab.icon + ' ' + tab.label;
+  btn.dataset.tab = tab.id;
+  btn.onclick = () => switchTab(tab.id);
+  if (tab.id === 'home') btn.classList.add('active');
+  nav.appendChild(btn);
+});
+
+switchTab('home');
+</script></body></html>
