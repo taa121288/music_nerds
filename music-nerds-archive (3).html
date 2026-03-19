@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Music Nerds — Archive, 2020–2025</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #141216;
+  --bg2: #1a181e;
+  --fg: #e8e4ec;
+  --fg2: #b8b2c0;
+  --fg3: #8a8494;
+  --fg4: #5e586a;
+  --border: rgba(255,255,255,0.07);
+  --card: rgba(255,255,255,0.03);
+  --accent: #b49cdf;
+  --accent2: #d4a0c4;
+  --paper: #1e1c22;
+  --serif: 'EB Garamond', 'Georgia', serif;
+  --sans: 'Instrument Sans', 'Helvetica Neue', sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);max-width:800px;margin:0 auto;min-height:100vh;line-height:1.5}
+
+/* ——— NAVIGATION ——— */
+nav{position:sticky;top:0;z-index:100;background:rgba(20,18,22,0.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 16px;display:flex;flex-wrap:wrap;justify-content:center;gap:0}
+nav button{padding:10px 10px 8px;border:none;background:none;cursor:pointer;color:var(--fg3);font-size:10px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;border-bottom:1.5px solid transparent;white-space:nowrap;font-family:var(--sans);transition:color .2s}
+nav button.active{color:var(--accent);border-bottom-color:var(--accent)}
+nav button:hover{color:var(--fg)}
+
+/* ——— VIEWS ——— */
+.view{display:none;padding:0 24px 60px}.view.active{display:block}
+
+/* ——— TYPOGRAPHY ——— */
+.page-title{font-family:var(--serif);font-size:2.6rem;font-weight:400;letter-spacing:-0.02em;line-height:1.1;color:var(--fg)}
+.page-subtitle{font-family:var(--sans);font-size:11px;color:var(--fg3);letter-spacing:0.06em;text-transform:uppercase;margin-top:6px}
+.section-label{font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--fg3);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.year-heading{font-family:var(--serif);font-size:3.2rem;font-weight:400;letter-spacing:-0.03em;color:var(--fg);padding-top:20px}
+.person-heading{font-family:var(--serif);font-size:1.1rem;font-weight:500;color:var(--fg);margin-bottom:10px}
+.person-count{font-family:var(--sans);font-size:11px;color:var(--fg4);margin-left:6px;font-weight:400}
+
+/* ——— ALBUM CARDS ——— */
+.pick{display:flex;gap:14px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--border)}
+.pick:last-child{border-bottom:none}
+.pick .cover{width:52px;height:52px;min-width:52px;border-radius:2px;overflow:hidden;background:var(--card);box-shadow:0 1px 4px rgba(0,0,0,0.3)}
+.pick .cover img{width:100%;height:100%;object-fit:cover;display:block}
+.pick .info{flex:1;min-width:0;padding-top:2px}
+.pick .album-title{font-family:var(--serif);font-size:15px;font-weight:500;color:var(--fg);line-height:1.3}
+.pick .artist{font-family:var(--sans);font-size:12px;color:var(--fg2);margin-top:1px}
+.pick .rank-num{font-family:var(--serif);font-size:12px;color:var(--fg3);font-style:italic;margin-right:4px}
+.pick .fav-mark{font-family:var(--sans);font-size:8px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--accent);margin-left:6px;vertical-align:middle}
+.pick .note{font-family:var(--serif);font-size:12.5px;color:var(--fg2);font-style:italic;margin-top:3px;line-height:1.4}
+.pick .track-name{font-family:var(--sans);font-size:10px;color:var(--fg3);margin-top:2px}
+.pick .meta{display:flex;gap:6px;align-items:center;margin-top:4px;flex-wrap:wrap}
+
+/* ——— PERSON TAGS ——— */
+.tag{font-family:var(--sans);font-size:10px;font-weight:500;color:var(--fg3);letter-spacing:0.02em}
+
+/* ——— CONSENSUS ROWS ——— */
+.consensus-item{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+.consensus-item:last-child{border-bottom:none}
+.consensus-item .c-cover{width:40px;height:40px;min-width:40px;border-radius:2px;overflow:hidden;background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,0.3)}
+.consensus-item .c-cover img{width:100%;height:100%;object-fit:cover;display:block}
+.consensus-item .c-info{flex:1;min-width:0}
+.consensus-item .c-album{font-family:var(--serif);font-size:14px;font-weight:500;color:var(--fg)}
+.consensus-item .c-detail{font-family:var(--sans);font-size:11px;color:var(--fg2);margin-top:1px}
+.consensus-item .c-tags{display:flex;gap:6px;flex-wrap:wrap}
+
+/* ——— STATS ——— */
+.stat-row{display:flex;align-items:center;gap:10px;padding:6px 0}
+.stat-row .stat-label{font-family:var(--sans);font-size:11px;color:var(--fg2);min-width:70px;font-weight:500}
+.stat-row .bar-track{flex:1;height:3px;background:var(--border);border-radius:1px;overflow:hidden}
+.stat-row .bar-fill{height:100%;border-radius:1px;background:var(--accent)}
+.stat-row .stat-val{font-family:var(--sans);font-size:10px;color:var(--fg4);min-width:50px;text-align:right}
+
+/* ——— OVERLAP TABLE ——— */
+.ov-table{border-collapse:collapse;font-family:var(--sans);font-size:10px;width:auto}
+.ov-table th{padding:3px 5px;font-weight:600;color:var(--fg3);writing-mode:vertical-rl;height:50px;font-size:9px;letter-spacing:0.03em}
+.ov-table td{padding:3px 5px;text-align:center;font-weight:600;color:var(--fg4)}
+.ov-table td.hot{background:rgba(180,156,223,0.15);color:var(--fg)}
+.ov-table td.warm{background:rgba(180,156,223,0.06);color:var(--fg2)}
+.ov-table .row-hd{text-align:left;color:var(--fg3);font-weight:600;padding-right:8px}
+
+/* ——— SEARCH ——— */
+.search-field{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:3px;background:var(--bg2);color:var(--fg);font-size:13px;font-family:var(--sans);outline:none;transition:border-color .2s}
+.search-field:focus{border-color:var(--accent)}
+.search-field::placeholder{color:var(--fg4)}
+
+/* ——— ARTIST LIST ——— */
+.artist-row{padding:10px 0;border-bottom:1px solid var(--border)}
+.artist-row:last-child{border-bottom:none}
+.artist-row .ar-name{font-family:var(--serif);font-size:15px;font-weight:500;color:var(--fg)}
+.artist-row .ar-meta{font-family:var(--sans);font-size:11px;color:var(--fg2);margin-top:2px}
+.artist-row .ar-albums{font-family:var(--serif);font-size:12px;color:var(--fg3);font-style:italic;margin-top:2px}
+
+/* ——— PEOPLE GRID ——— */
+.people-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+.person-card{padding:20px;border:1px solid var(--border);border-radius:3px;background:var(--bg2);cursor:pointer;transition:border-color .2s,background .2s}
+.person-card:hover{border-color:rgba(255,255,255,0.15);background:rgba(255,255,255,0.05)}
+.person-card .pc-name{font-family:var(--serif);font-size:1.1rem;font-weight:500;color:var(--fg)}
+.person-card .pc-info{font-family:var(--sans);font-size:11px;color:var(--fg3);margin-top:4px}
+.person-card .pc-taste{font-family:var(--sans);font-size:11.5px;color:var(--fg2);margin-top:10px;line-height:1.55}
+.person-card .pc-arrow{font-family:var(--sans);font-size:10px;color:var(--fg4);margin-top:10px;letter-spacing:0.04em;text-transform:uppercase}
+
+/* ——— PERSON DETAIL ——— */
+.back-link{font-family:var(--sans);font-size:11px;color:var(--fg3);cursor:pointer;display:inline-flex;align-items:center;gap:4px;padding:6px 0;margin-bottom:8px;border:none;background:none;letter-spacing:0.03em;transition:color .2s}
+.back-link:hover{color:var(--fg)}
+.person-detail-header{padding:20px 0 24px;border-bottom:1px solid var(--border);margin-bottom:28px}
+.person-detail-header .pd-name{font-family:var(--serif);font-size:2rem;font-weight:400;letter-spacing:-0.01em}
+.person-detail-header .pd-meta{font-family:var(--sans);font-size:11px;color:var(--fg3);margin-top:6px;letter-spacing:0.02em}
+.person-detail-header .pd-taste{font-family:var(--sans);font-size:13px;color:var(--fg2);margin-top:12px;line-height:1.6;max-width:560px}
+
+/* ——— INSIGHT BLOCKS ——— */
+.insight-block{padding:12px 0;border-bottom:1px solid var(--border)}
+.insight-block:last-child{border-bottom:none}
+.insight-block .ib-title{font-family:var(--serif);font-size:14px;font-weight:500;color:var(--fg)}
+.insight-block .ib-body{font-family:var(--sans);font-size:12px;color:var(--fg3);margin-top:3px;line-height:1.5}
+
+/* ——— THREAD INDEX ——— */
+.thread-line{display:flex;align-items:baseline;gap:12px;padding:6px 0;border-bottom:1px solid var(--border)}
+.thread-line .tl-year{font-family:var(--serif);font-size:1.4rem;font-weight:400;color:var(--fg);width:50px}
+.thread-line .tl-info{font-family:var(--sans);font-size:12px;color:var(--fg3);flex:1}
+
+/* ——— SECTION DIVIDERS ——— */
+.section-gap{margin-top:40px}
+.section-gap-sm{margin-top:24px}
+
+/* ——— FOOTER ——— */
+.footer{text-align:center;padding:32px 24px 48px;font-family:var(--sans);font-size:10px;color:var(--fg4);letter-spacing:0.04em;border-top:1px solid var(--border);margin-top:40px}
+
+/* ——— FADE-IN ——— */
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.view.active{animation:fadeIn .3s ease}
+
+/* ——— RESPONSIVE ——— */
+@media(max-width:600px){
+  .page-title{font-size:2rem}
+  .year-heading{font-size:2.4rem}
+  .view{padding:0 16px 40px}
+  nav{padding:0 12px}
+  nav button{padding:12px 10px 10px;font-size:10px}
+}
+</style>
+</head>
+<body>
+
+<nav id="nav"></nav>
+<div id="app"></div>
+<div class="footer"><span id="coverStatus"></span>Music Nerds Archive — 2020–2025 — Extracted from Gmail</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════
+
+const PEOPLE = {
+  taylor:{name:"Taylor Anderson",short:"Taylor",color:"#d4a07a"},
+  robert:{name:"R Robinson",short:"Robert",color:"#7ab8d4"},
+  earl:{name:"Earl Frost-Parsons",short:"Earl",color:"#8cc47a"},
+  huston:{name:"Huston Parkhurst",short:"Huston",color:"#d4c47a"},
+  tyler:{name:"Tyler Valeska",short:"Tyler",color:"#b49cdf"},
+  paul:{name:"Paul Soud",short:"Paul",color:"#7ad4b8"},
+  brian:{name:"Brian McMahon",short:"Brian",color:"#d49cb4"},
+  clint:{name:"Clint Roney",short:"Clint",color:"#a0c490"},
+  danny:{name:"Danny McMahon",short:"Danny",color:"#c4b07a"},
+};
+
+const PICKS = [
+// 2020
+{y:2020,p:"danny",a:"Fleet Foxes",l:"Shore"},{y:2020,p:"danny",a:"Fruit Bats",l:"The Glory of Fruit Bats"},{y:2020,p:"danny",a:"Kevin Morby",l:"Sundowner"},{y:2020,p:"danny",a:"Sturgill Simpson",l:"Cuttin' Grass Vol. 1"},{y:2020,p:"danny",a:"Sylvan Esso",l:"Free Love"},
+{y:2020,p:"taylor",a:"Fiona Apple",l:"Fetch the Bolt Cutters",r:1,n:"Pitchfork 10. A modern Bob Dylan"},{y:2020,p:"taylor",a:"Adrianne Lenker",l:"songs",r:2,n:"Every song is gorgeous"},{y:2020,p:"taylor",a:"Bob Dylan",l:"Rough and Rowdy Ways",r:3},{y:2020,p:"taylor",a:"Fleet Foxes",l:"Shore",r:4},{y:2020,p:"taylor",a:"Andy Shauf",l:"Neon Skyline",r:5,n:"And fuck you Judy"},{y:2020,p:"taylor",a:"Perfume Genius",l:"Set My Heart on Fire Immediately",r:6},{y:2020,p:"taylor",a:"The Strokes",l:"The New Abnormal",r:7},{y:2020,p:"taylor",a:"Waxahatchee",l:"Saint Cloud",r:8},{y:2020,p:"taylor",a:"Run the Jewels",l:"RTJ4",r:9},{y:2020,p:"taylor",a:"Trace Mountains",l:"Lost in the Country",r:10},
+{y:2020,p:"tyler",a:"Moses Sumney",l:"grae"},{y:2020,p:"tyler",a:"Fiona Apple",l:"Fetch the Bolt Cutters"},{y:2020,p:"tyler",a:"Waxahatchee",l:"Saint Cloud",n:"If ranking, 1 or 2"},{y:2020,p:"tyler",a:"Hamilton Leithauser",l:"The Loves of Your Life"},{y:2020,p:"tyler",a:"Fleet Foxes",l:"Shore",n:"Probably AOTY"},{y:2020,p:"tyler",a:"Destroyer",l:"Have We Met"},{y:2020,p:"tyler",a:"Jeff Rosenstock",l:"NO DREAM"},{y:2020,p:"tyler",a:"Haim",l:"Women in Music Pt. III"},{y:2020,p:"tyler",a:"Bob Dylan",l:"Rough and Rowdy Ways"},
+{y:2020,p:"huston",a:"Waxahatchee",l:"Saint Cloud",n:"Listened 1000 times"},{y:2020,p:"huston",a:"Futurebirds",l:"Teamwork"},{y:2020,p:"huston",a:"Run the Jewels",l:"RTJ4",n:"If you don't like RTJ4, fuck you"},{y:2020,p:"huston",a:"Andy Shauf",l:"Neon Skyline",n:"That Judy is a real bitch"},{y:2020,p:"huston",a:"Freddie Gibbs",l:"Alfredo",n:"Started because I love Italian food"},{y:2020,p:"huston",a:"Bully",l:"SUGAREGG"},{y:2020,p:"huston",a:"Orville Peck",l:"Show Pony"},{y:2020,p:"huston",a:"Daniel Romano",l:"How Ill Thy World is Ordered"},{y:2020,p:"huston",a:"Fruit Bats",l:"The Pet Parade"},{y:2020,p:"huston",a:"Jason Isbell",l:"Reunions"},
+{y:2020,p:"clint",a:"Phoebe Bridgers",l:"Punisher",r:1},{y:2020,p:"clint",a:"Andy Shauf",l:"Neon Skyline",r:2},{y:2020,p:"clint",a:"The Strokes",l:"The New Abnormal",r:3},{y:2020,p:"clint",a:"Fiona Apple",l:"Fetch the Bolt Cutters",r:4},{y:2020,p:"clint",a:"Perfume Genius",l:"Set My Heart on Fire Immediately",r:5},{y:2020,p:"clint",a:"Stephen Malkmus",l:"Traditional Techniques",r:6},{y:2020,p:"clint",a:"Daniel Romano",l:"How Ill Thy World Is Ordered",r:7},{y:2020,p:"clint",a:"Run the Jewels",l:"RTJ4",r:8},{y:2020,p:"clint",a:"Waxahatchee",l:"Saint Cloud",r:9},{y:2020,p:"clint",a:"Luke Schneider",l:"Altar of Harmony",r:10},
+{y:2020,p:"earl",a:"Fleet Foxes",l:"Shore",r:1,n:"Hands down AOTY"},{y:2020,p:"earl",a:"Cut Worms",l:"Nobody Lives Here Anymore",r:2},{y:2020,p:"earl",a:"The Strokes",l:"The New Abnormal",r:3},{y:2020,p:"earl",a:"Haim",l:"Women In Music Pt. III",r:4},{y:2020,p:"earl",a:"Waxahatchee",l:"Saint Cloud",r:5},{y:2020,p:"earl",a:"Kevin Morby",l:"Sundowner",r:6},{y:2020,p:"earl",a:"Bully",l:"SUGAREGG",r:7},{y:2020,p:"earl",a:"Widowspeak",l:"Plum",r:8},{y:2020,p:"earl",a:"Run the Jewels",l:"RTJ4",r:9},{y:2020,p:"earl",a:"Matt Berninger",l:"Serpentine Prison",r:10},
+// 2021
+{y:2021,p:"danny",a:"Aaron Frazier",l:"Introducing..."},{y:2021,p:"danny",a:"Black Keys",l:"Delta Kream"},{y:2021,p:"danny",a:"Sierra Ferrell",l:"Long Time Coming"},{y:2021,p:"danny",a:"Shannon and the Clams",l:"Year of the Spider"},{y:2021,p:"danny",a:"Billy Strings",l:"Renewal"},{y:2021,p:"danny",a:"Pokey LaFarge",l:"In the Blossom of their Shade"},{y:2021,p:"danny",a:"Fleet Foxes",l:"A Very Lonely Solstice"},{y:2021,p:"danny",a:"Houndmouth",l:"Good For You"},{y:2021,p:"danny",a:"Andrew Bird & Jimbo Mathus",l:"These 13"},{y:2021,p:"danny",a:"Benny Sings",l:"Beat Tape II"},
+{y:2021,p:"taylor",a:"Big Red Machine",l:"How Long Do You Think It's Gonna Last"},{y:2021,p:"taylor",a:"Billy Strings",l:"Renewal",n:"Most listened to album of the year"},{y:2021,p:"taylor",a:"Sierra Ferrell",l:"Long Time Coming"},{y:2021,p:"taylor",a:"Goose",l:"Shenanigans Nite Club"},{y:2021,p:"taylor",a:"Cory Hanson",l:"Pale Horse Rider",n:"May be my favorite. I hear Thom Yorke"},{y:2021,p:"taylor",a:"Andy Shauf",l:"Wilds"},{y:2021,p:"taylor",a:"Snail Mail",l:"Valentine"},{y:2021,p:"taylor",a:"Tex Crick",l:"Live in New York City"},{y:2021,p:"taylor",a:"Trace Mountains",l:"HOUSE OF CONFUSION"},{y:2021,p:"taylor",a:"The War on Drugs",l:"I Don't Live Here Anymore"},{y:2021,p:"taylor",a:"Tyler, The Creator",l:"CALL ME IF YOU GET LOST"},
+{y:2021,p:"huston",a:"Chika",l:"Once Upon a Time",n:"Alabama rapper. SLAPS"},{y:2021,p:"huston",a:"Julien Baker",l:"Little Oblivions"},{y:2021,p:"huston",a:"Fruit Bats",l:"Siamese Dream"},{y:2021,p:"huston",a:"Sierra Ferrell",l:"Long Time Coming"},{y:2021,p:"huston",a:"Big Red Machine",l:"How Long...",n:"Came for T-Swift. Stayed for T-Swift"},{y:2021,p:"huston",a:"Andy Shauf",l:"Wilds"},{y:2021,p:"huston",a:"Duckwrth",l:"SG8"},{y:2021,p:"huston",a:"Billy Strings",l:"Renewal"},
+{y:2021,p:"earl",a:"Iceage",l:"Seek Shelter"},{y:2021,p:"earl",a:"Wolf Alice",l:"Blue Weekend"},{y:2021,p:"earl",a:"The Marias",l:"CINEMA"},{y:2021,p:"earl",a:"Hovvdy",l:"True Love"},{y:2021,p:"earl",a:"Snail Mail",l:"Valentine"},{y:2021,p:"earl",a:"Lana Del Rey",l:"Chemtrails Over the Country Club"},{y:2021,p:"earl",a:"Cory Hanson",l:"Pale Horse Rider"},{y:2021,p:"earl",a:"Parquet Courts",l:"Sympathy for Life"},{y:2021,p:"earl",a:"Goat Girl",l:"On All Fours"},{y:2021,p:"earl",a:"Sufjan Stevens & Angelo De Augustine",l:"A Beginner's Mind"},
+{y:2021,p:"tyler",a:"Vijay Iyer / Linda May Han Oh / Tyshawn Sorey",l:"Uneasy"},{y:2021,p:"tyler",a:"Floating Points / Pharoah Sanders / LSO",l:"Promises"},{y:2021,p:"tyler",a:"The Weather Station",l:"Ignorance"},{y:2021,p:"tyler",a:"Low",l:"HEY WHAT"},{y:2021,p:"tyler",a:"Nala Sinephro",l:"Space 1.8"},{y:2021,p:"tyler",a:"Vince Staples",l:"Vince Staples"},{y:2021,p:"tyler",a:"Japanese Breakfast",l:"Jubilee"},{y:2021,p:"tyler",a:"Squid",l:"Bright Green Field"},{y:2021,p:"tyler",a:"Spirit of the Beehive",l:"ENTERTAINMENT, DEATH"},
+{y:2021,p:"clint",a:"The War on Drugs",l:"I Don't Live Here Anymore"},{y:2021,p:"clint",a:"Tex Crick",l:"Live in New York City"},{y:2021,p:"clint",a:"Sufjan Stevens & Angelo De Augustine",l:"A Beginner's Mind"},{y:2021,p:"clint",a:"Andy Shauf",l:"Wilds"},{y:2021,p:"clint",a:"Cory Hanson",l:"Pale Horse Rider"},{y:2021,p:"clint",a:"Parquet Courts",l:"Sympathy for Life"},{y:2021,p:"clint",a:"Sam Evian",l:"Time to Melt"},{y:2021,p:"clint",a:"Natalie Bergman",l:"Mercy"},{y:2021,p:"clint",a:"Kacey Musgraves",l:"star-crossed"},
+{y:2021,p:"brian",a:"Floating Points / Pharoah Sanders / LSO",l:"Promises",r:1,n:"Cool jazz, many nights to sleep"},{y:2021,p:"brian",a:"Jazmine Sullivan",l:"Heaux Tales",r:2},{y:2021,p:"brian",a:"Jon Hopkins",l:"Music for Psychedelic Therapy",r:3},{y:2021,p:"brian",a:"Julius Eastman / wild Up",l:"Julius Eastman Vol. 1: Feminine",r:4},{y:2021,p:"brian",a:"PinkPantheress",l:"to hell with it",r:5,n:"Cool witch music"},{y:2021,p:"brian",a:"Helado Negro",l:"Far In",r:6},{y:2021,p:"brian",a:"Nala Sinephro",l:"Space 1.8",r:7},{y:2021,p:"brian",a:"Andy Shauf",l:"Wilds",r:8},{y:2021,p:"brian",a:"Sufjan Stevens & Angelo De Augustine",l:"A Beginner's Mind",r:9},{y:2021,p:"brian",a:"Japanese Breakfast",l:"Jubilee",r:10},{y:2021,p:"brian",a:"Field Medic",l:"Plunge Deep Golden Knife",r:11},{y:2021,p:"brian",a:"Snail Mail",l:"Valentine",r:12},{y:2021,p:"brian",a:"The War on Drugs",l:"I Don't Live Here Anymore",r:13},
+// 2022
+{y:2022,p:"brian",a:"Yaya Bey",l:"Remember your North Star"},{y:2022,p:"brian",a:"Big Thief",l:"Dragon New Warm Mountain I Believe in You",n:"Epic kaleidoscope. Favorite Big Thief"},{y:2022,p:"brian",a:"Alex G",l:"God Save the Animals"},{y:2022,p:"brian",a:"Sudan Archives",l:"Natural Brown Prom Queen"},{y:2022,p:"brian",a:"Sasami",l:"Squeeze"},{y:2022,p:"brian",a:"R.A.P. Ferreira",l:"5 to the Eyes with Stars"},{y:2022,p:"brian",a:"Nilufer Yanya",l:"Painless",n:"Heartbreaking lyrics"},{y:2022,p:"brian",a:"Ari Lennox",l:"Age/Sex/Location"},{y:2022,p:"brian",a:"Aldous Harding",l:"Warm Chris"},{y:2022,p:"brian",a:"Florist",l:"Florist"},{y:2022,p:"brian",a:"Black Country, New Road",l:"Ants From Up Here"},{y:2022,p:"brian",a:"Jockstrap",l:"I Love You Jennifer B"},{y:2022,p:"brian",a:"Angel Olsen",l:"Big Time"},{y:2022,p:"brian",a:"Steve Lacy",l:"Gemini Rights"},
+{y:2022,p:"tyler",a:"Destroyer",l:"Labyrinthitis"},{y:2022,p:"tyler",a:"The Smile",l:"A Light for Attracting Attention"},{y:2022,p:"tyler",a:"Alex G",l:"God Save the Animals"},{y:2022,p:"tyler",a:"Black Country, New Road",l:"Ants from Up There"},{y:2022,p:"tyler",a:"Kendrick Lamar",l:"Mr. Morale & The Big Steppers"},{y:2022,p:"tyler",a:"Earl Sweatshirt",l:"Sick!"},{y:2022,p:"tyler",a:"Alabaster DePlume",l:"Gold"},{y:2022,p:"tyler",a:"Kurt Vile",l:"(watch my moves)"},{y:2022,p:"tyler",a:"MJ Lenderman",l:"Boat Songs"},{y:2022,p:"tyler",a:"Cate Le Bon",l:"Pompeii"},{y:2022,p:"tyler",a:"black midi",l:"Hellfire"},{y:2022,p:"tyler",a:"Alvvays",l:"Blue Rev"},{y:2022,p:"tyler",a:"Oso Oso",l:"Sore Thumb"},{y:2022,p:"tyler",a:"Jeff Parker",l:"Forfolks"},
+{y:2022,p:"huston",a:"Orville Peck",l:"Bronco",r:1},{y:2022,p:"huston",a:"Pusha T",l:"It's Almost Dry",r:2},{y:2022,p:"huston",a:"Megan Thee Stallion",l:"Traumazine",r:3},{y:2022,p:"huston",a:"Josh Hedley",l:"Neon Blue",r:4},{y:2022,p:"huston",a:"JID",l:"The Forever Story",r:5},{y:2022,p:"huston",a:"Tobe Nwigwe",l:"moMINTS",r:6},{y:2022,p:"huston",a:"Freddie Gibbs",l:"Soul Sold Separately",r:7},{y:2022,p:"huston",a:"The Beths",l:"Expert in a Dying Field",r:8},{y:2022,p:"huston",a:"Wet Leg",l:"Wet Leg",r:9},{y:2022,p:"huston",a:"Lost Dog Street Band",l:"Glory",r:10},{y:2022,p:"huston",a:"Ian Noe",l:"River Fools & Mountain Saints",r:11},{y:2022,p:"huston",a:"Nilufer Yanya",l:"Painless",r:12},{y:2022,p:"huston",a:"Benjamin Todd",l:"Songs I Swore I'd Never Sing",r:13},
+{y:2022,p:"clint",a:"Dehd",l:"Blue Skies"},{y:2022,p:"clint",a:"Aldous Harding",l:"Warm Chris"},{y:2022,p:"clint",a:"Big Thief",l:"Dragon New Warm Mountain I Believe In You"},{y:2022,p:"clint",a:"Kurt Vile",l:"(watch my moves)"},{y:2022,p:"clint",a:"MJ Lenderman",l:"Boat Songs"},{y:2022,p:"clint",a:"Alvvays",l:"Blue Rev"},{y:2022,p:"clint",a:"Izaak Opatz",l:"Extra Medium"},{y:2022,p:"clint",a:"Kendrick Lamar",l:"Mr. Morale & The Big Steppers"},{y:2022,p:"clint",a:"Cate Le Bon",l:"Pompeii"},{y:2022,p:"clint",a:"Andrew Bird",l:"Inside Problems"},{y:2022,p:"clint",a:"S.G. Goodman",l:"Teeth Marks"},
+{y:2022,p:"taylor",a:"Big Thief",l:"Dragon New Warm Mountain I Believe In You",n:"A masterpiece. Change is one of the best songs ever"},{y:2022,p:"taylor",a:"Alvvays",l:"Blue Rev"},{y:2022,p:"taylor",a:"Dehd",l:"Blue Skies"},{y:2022,p:"taylor",a:"Orville Peck",l:"Bronco"},{y:2022,p:"taylor",a:"Goose",l:"Dripfield",n:"Favorite live act"},{y:2022,p:"taylor",a:"The Beths",l:"Expert In A Dying Field"},{y:2022,p:"taylor",a:"Florist",l:"Florist"},{y:2022,p:"taylor",a:"Andrew Bird",l:"Inside Problems"},{y:2022,p:"taylor",a:"The Smile",l:"A Light For Attracting Attention"},{y:2022,p:"taylor",a:"Spoon",l:"Lucifer on the Sofa"},{y:2022,p:"taylor",a:"Kendrick Lamar",l:"Mr. Morale & The Big Steppers"},{y:2022,p:"taylor",a:"Nilufer Yanya",l:"Painless"},{y:2022,p:"taylor",a:"Kevin Morby",l:"This is a Photograph"},{y:2022,p:"taylor",a:"Wet Leg",l:"Wet Leg"},
+{y:2022,p:"earl",a:"Nilufer Yanya",l:"Painless"},{y:2022,p:"earl",a:"Angel Olsen",l:"Big Time"},{y:2022,p:"earl",a:"Yeah Yeah Yeahs",l:"Cool It Down"},{y:2022,p:"earl",a:"Alvvays",l:"Blue Rev"},{y:2022,p:"earl",a:"Arctic Monkeys",l:"The Car"},{y:2022,p:"earl",a:"Wet Leg",l:"Wet Leg"},{y:2022,p:"earl",a:"Special Interest",l:"Endure"},{y:2022,p:"earl",a:"The Smile",l:"A Light for Attracting Attention"},{y:2022,p:"earl",a:"Kevin Morby",l:"This Is A Photograph"},{y:2022,p:"earl",a:"Ty Segall",l:"Hello, Hi"},{y:2022,p:"earl",a:"Kendrick Lamar",l:"Mr. Morale & the Big Steppers"},{y:2022,p:"earl",a:"MJ Lenderman",l:"Boat Songs"},{y:2022,p:"earl",a:"Big Thief",l:"Dragon New Warm Mountain I Believe in You"},{y:2022,p:"earl",a:"Djo",l:"DECIDE"},
+{y:2022,p:"paul",a:"Alvvays",l:"Blue Rev"},{y:2022,p:"paul",a:"Angel Olsen",l:"Big Time"},{y:2022,p:"paul",a:"Kikagaku Moyo",l:"Kumoyo Island"},{y:2022,p:"paul",a:"Minami Deutsch",l:"Fortune Goodies"},{y:2022,p:"paul",a:"Wand",l:"Spiders in the Rain"},{y:2022,p:"paul",a:"Elkhorn",l:"Distances"},{y:2022,p:"paul",a:"Spiritualized",l:"Everything was Beautiful"},{y:2022,p:"paul",a:"Matthew J. Rolin",l:"Passing"},
+// 2023
+{y:2023,p:"huston",a:"Lewis Capaldi",l:"Broken by Desire to be Heavenly Sent"},{y:2023,p:"huston",a:"Bully",l:"Lucky For You"},{y:2023,p:"huston",a:"Nas",l:"King's Disease III"},{y:2023,p:"huston",a:"Cut Worms",l:"Cut Worms"},{y:2023,p:"huston",a:"Blondshell",l:"Blondshell",n:"Listened to this the most"},{y:2023,p:"huston",a:"King Gizzard",l:"PetroDragonic Apocalypse"},{y:2023,p:"huston",a:"Lydia Loveless",l:"Nothing's Gonna Stand In My Way Again"},{y:2023,p:"huston",a:"Stephen Wilson Jr",l:"Son of Dad"},
+{y:2023,p:"taylor",a:"Andre 3000",l:"New Blue Sun",n:"Jazz with flutes. What a pivot"},{y:2023,p:"taylor",a:"Andy Shauf",l:"Norm",n:"Most listened to. Concept album, genius"},{y:2023,p:"taylor",a:"Cut Worms",l:"Cut Worms"},{y:2023,p:"taylor",a:"Dean Johnson",l:"Nothing For Me, Please"},{y:2023,p:"taylor",a:"Joanna Sternberg",l:"I Got Me"},{y:2023,p:"taylor",a:"Mac DeMarco",l:"Five Easy Hotdogs"},{y:2023,p:"taylor",a:"MJ Lenderman",l:"And the Wind (Live and Loose!)"},{y:2023,p:"taylor",a:"Slow Pulp",l:"Yard"},{y:2023,p:"taylor",a:"Sufjan Stevens",l:"Javelin",n:"Probably AOTY"},{y:2023,p:"taylor",a:"Wednesday",l:"Rat Saw God",n:"Best body of work all year"},
+{y:2023,p:"earl",a:"Indigo De Souza",l:"All of This Will End",r:1},{y:2023,p:"earl",a:"Wednesday",l:"Rat Saw God",r:2},{y:2023,p:"earl",a:"Ratboys",l:"The Window",r:3},{y:2023,p:"earl",a:"Bully",l:"Lucky for You",r:4},{y:2023,p:"earl",a:"Jamila Woods",l:"Water Made Us",r:5},{y:2023,p:"earl",a:"Queens of the Stone Age",l:"In Times New Roman",r:6},{y:2023,p:"earl",a:"Lana Del Rey",l:"Tunnel Under Ocean Blvd",r:7},{y:2023,p:"earl",a:"Cory Hanson",l:"Western Cum",r:8},{y:2023,p:"earl",a:"The Kills",l:"God Games",r:9},{y:2023,p:"earl",a:"Beach Fossils",l:"Bunny",r:10},
+{y:2023,p:"paul",a:"Ratboys",l:"The Window"},{y:2023,p:"paul",a:"Cory Hanson",l:"Western Cum"},{y:2023,p:"paul",a:"William Tyler",l:"Secret Stratosphere"},{y:2023,p:"paul",a:"Geese",l:"3D Country",n:"Punk, country, lounge. Indescribable"},{y:2023,p:"paul",a:"Danny Paul Grody",l:"Arc of Day"},{y:2023,p:"paul",a:"Hayden Pedigo",l:"The Happiest Times I Ever Ignored"},{y:2023,p:"paul",a:"Rose City Band",l:"Garden Party"},{y:2023,p:"paul",a:"Maya Ongaku",l:"Approach to Anima"},{y:2023,p:"paul",a:"Bobby Lee",l:"Endless Skyways"},{y:2023,p:"paul",a:"Frankie and the Witch Fingers",l:"Data Doom"},
+{y:2023,p:"brian",a:"Sufjan Stevens",l:"Javelin",r:1,n:"All time fav Sufjan songs"},{y:2023,p:"brian",a:"Bully",l:"Lucky for You",r:2},{y:2023,p:"brian",a:"Andre 3000",l:"New Blue Sun",r:3},{y:2023,p:"brian",a:"Youth Lagoon",l:"Heaven is a Junkyard",r:4},{y:2023,p:"brian",a:"Water From Your Eyes",l:"Everyone's Crushed",r:5,n:"Makes me feel cooler"},{y:2023,p:"brian",a:"Arlo Parks",l:"My Soft Machine"},{y:2023,p:"brian",a:"Mitski",l:"The Land is Inhospitable"},{y:2023,p:"brian",a:"Olivia Rodrigo",l:"Guts"},{y:2023,p:"brian",a:"Janelle Monae",l:"The Age of Pleasure"},{y:2023,p:"brian",a:"Noname",l:"Sundial"},{y:2023,p:"brian",a:"Paramore",l:"This is Why"},{y:2023,p:"brian",a:"yeule",l:"softscars"},
+// 2024
+{y:2024,p:"tyler",a:"Charli xcx",l:"Brat (remix)",t:"Mean Girls ft. Julian Casablancas"},{y:2024,p:"tyler",a:"Father John Misty",l:"Mahashmashana"},{y:2024,p:"tyler",a:"Jeff Parker",l:"The Way out of Easy"},{y:2024,p:"tyler",a:"MJ Lenderman",l:"Manning Fireworks",t:"She's Leaving You"},{y:2024,p:"tyler",a:"Mount Eerie",l:"Night Palace"},{y:2024,p:"tyler",a:"Vampire Weekend",l:"Only God Was Above Us"},
+{y:2024,p:"huston",a:"Tyler, The Creator",l:"Chromakopia"},{y:2024,p:"huston",a:"Kendrick Lamar",l:"GNX"},{y:2024,p:"huston",a:"Orville Peck",l:"Stampede"},{y:2024,p:"huston",a:"John Moreland",l:"Visitor"},{y:2024,p:"huston",a:"Beyonce",l:"Cowboy Carter",n:"This album fuks"},{y:2024,p:"huston",a:"Johnny Blue Skies",l:"Passage Du Desir"},{y:2024,p:"huston",a:"Charley Crockett",l:"$10 Cowboy"},{y:2024,p:"huston",a:"Molly Tuttle",l:"Into The Wild"},{y:2024,p:"huston",a:"Zach Top",l:"Cold Beer & Country Music"},{y:2024,p:"huston",a:"Gillian Welch",l:"Woodland"},
+{y:2024,p:"earl",a:"Nilufer Yanya",l:"My Method Actor"},{y:2024,p:"earl",a:"MJ Lenderman",l:"Manning Fireworks"},{y:2024,p:"earl",a:"Waxahatchee",l:"Tigers Blood"},{y:2024,p:"earl",a:"IDLES",l:"TANGK"},{y:2024,p:"earl",a:"Mannequin Pussy",l:"I Got Heaven"},{y:2024,p:"earl",a:"Good Looks",l:"Lived Here For A While"},{y:2024,p:"earl",a:"Fontaines D.C.",l:"Romance"},{y:2024,p:"earl",a:"Porridge Radio",l:"Clouds In The Sky"},{y:2024,p:"earl",a:"Jack White",l:"No Name"},{y:2024,p:"earl",a:"Jason Isbell",l:"Weathervanes"},{y:2024,p:"earl",a:"Good Morning",l:"Good Morning Seven"},{y:2024,p:"earl",a:"Chappell Roan",l:"Midwest Princess"},
+{y:2024,p:"taylor",a:"Bon Iver",l:"SABLE",f:true},{y:2024,p:"taylor",a:"Kendrick Lamar",l:"gnx",f:true},{y:2024,p:"taylor",a:"Vampire Weekend",l:"Only God Was Above Us",f:true},{y:2024,p:"taylor",a:"Jack White",l:"No Name",f:true},{y:2024,p:"taylor",a:"Waxahatchee",l:"Tigers Blood",f:true},{y:2024,p:"taylor",a:"BigXThaPlug",l:"TAKE CARE"},{y:2024,p:"taylor",a:"Billy Strings",l:"Highway Prayers"},{y:2024,p:"taylor",a:"The Decemberists",l:"As it Ever Was, So It Will Be Again"},{y:2024,p:"taylor",a:"Dehd",l:"Poetry"},{y:2024,p:"taylor",a:"Ducks Ltd",l:"Harm's Way"},{y:2024,p:"taylor",a:"Father John Misty",l:"Mahashmashana"},{y:2024,p:"taylor",a:"Sierra Ferrell",l:"Trail of Flowers"},{y:2024,p:"taylor",a:"Futurebirds",l:"Easy Company"},{y:2024,p:"taylor",a:"Haley Heyndreckx",l:"Seed of a Seed"},{y:2024,p:"taylor",a:"Hurray For the Riff Raff",l:"The Past Is Still Alive"},{y:2024,p:"taylor",a:"Jason Isbell",l:"Weathervanes"},{y:2024,p:"taylor",a:"Johnny Blue Skies",l:"Passage Du Desir"},{y:2024,p:"taylor",a:"Adrianne Lenker",l:"Bright Future"},{y:2024,p:"taylor",a:"MJ Lenderman",l:"Manning Fireworks"},{y:2024,p:"taylor",a:"Kacey Musgraves",l:"Deeper Well"},{y:2024,p:"taylor",a:"Orebolo",l:"The Chateau"},{y:2024,p:"taylor",a:"Jessica Pratt",l:"Here in the Pitch"},{y:2024,p:"taylor",a:"Nala Sinephro",l:"Endlessness"},{y:2024,p:"taylor",a:"The Smile",l:"Cutouts"},
+{y:2024,p:"paul",a:"Jack White",l:"No Name",r:1},{y:2024,p:"paul",a:"Ducks Ltd.",l:"Harm's Way",r:2},{y:2024,p:"paul",a:"Jessica Pratt",l:"Here in the Pitch",r:3},{y:2024,p:"paul",a:"Fuubutsushi",l:"Meridians",r:4},{y:2024,p:"paul",a:"Wand",l:"Vertigo",r:5},{y:2024,p:"paul",a:"Cassini",l:"The Cassini Promise",r:6},{y:2024,p:"paul",a:"Somesurprises",l:"Perseids",r:7},{y:2024,p:"paul",a:"Winged Wheel",l:"Big Hotel",r:8},{y:2024,p:"paul",a:"Rosali",l:"Bite Down",r:9},{y:2024,p:"paul",a:"Color Green",l:"Fool's Parade",r:10},{y:2024,p:"paul",a:"The Bures Band",l:"Fool Circle",r:11},
+// 2025
+{y:2025,p:"robert",a:"Nourished by Time",l:"The Passionate Ones",r:1},{y:2025,p:"robert",a:"Geese",l:"Getting Killed",r:2},{y:2025,p:"robert",a:"Oklou",l:"Choke Enough",r:3},{y:2025,p:"robert",a:"Teethe",l:"Magic of the Sale",r:4},{y:2025,p:"robert",a:"Alex G",l:"Headlights",r:5},{y:2025,p:"robert",a:"Viagra Boys",l:"viagr aboys",r:6},{y:2025,p:"robert",a:"Ela Minus",l:"DIA",r:7},{y:2025,p:"robert",a:"Panda Bear",l:"Sinister Grift",r:9},{y:2025,p:"robert",a:"Oneohtrix Point Never",l:"Tranquilizer",r:10},{y:2025,p:"robert",a:"tagabow",l:"LOTTO",r:11},{y:2025,p:"robert",a:"shallowater",l:"Gods Gonna Give You a Million Dollars",r:12},{y:2025,p:"robert",a:"goon",l:"Dream 3",r:13},{y:2025,p:"robert",a:"twen",l:"Fate Euphoric",r:14},{y:2025,p:"robert",a:"Getdown Services",l:"Primordial Slot Machine",r:15},
+{y:2025,p:"taylor",a:"Bon Iver",l:"Sable Fable"},{y:2025,p:"taylor",a:"Cameron Winter",l:"Heavy Metal",f:true},{y:2025,p:"taylor",a:"Dean Johnson",l:"I Hope We Can Still Be Friends"},{y:2025,p:"taylor",a:"Dijon",l:"Baby",f:true},{y:2025,p:"taylor",a:"Geese",l:"Getting Killed",f:true},{y:2025,p:"taylor",a:"Goose",l:"Chain Yer Dragon"},{y:2025,p:"taylor",a:"Jason Isbell",l:"Foxes in the Snow"},{y:2025,p:"taylor",a:"Panda Bear",l:"Sinister Grift"},{y:2025,p:"taylor",a:"Saya Gray",l:"SAYA",f:true},{y:2025,p:"taylor",a:"Sharp Pins",l:"Radio DDR"},{y:2025,p:"taylor",a:"This is Lorelei",l:"Holo Boy"},{y:2025,p:"taylor",a:"Tyler, The Creator",l:"DON'T TAP THE GLASS"},{y:2025,p:"taylor",a:"Wednesday",l:"Bleeds",f:true},
+{y:2025,p:"earl",a:"Wednesday",l:"Bleeds"},{y:2025,p:"earl",a:"Blondshell",l:"If You Asked For A Picture"},{y:2025,p:"earl",a:"Water From Your Eyes",l:"It's a Beautiful Place"},{y:2025,p:"earl",a:"Samia",l:"Bloodless"},{y:2025,p:"earl",a:"Indigo De Souza",l:"Precipice"},{y:2025,p:"earl",a:"Jason Isbell",l:"Foxes in the Snow"},{y:2025,p:"earl",a:"Greg Freeman",l:"Burnover"},{y:2025,p:"earl",a:"Viagra Boys",l:"viagr aboys"},{y:2025,p:"earl",a:"The Beths",l:"Straight Line Was A Lie"},{y:2025,p:"earl",a:"Geese",l:"Getting Killed"},{y:2025,p:"earl",a:"twen",l:"Fate Euphoric"},
+{y:2025,p:"huston",a:"Clipse",l:"Let God Sort Em Out"},{y:2025,p:"huston",a:"Tyler, The Creator",l:"Don't Tap The Glass"},{y:2025,p:"huston",a:"Kendrick Lamar",l:"GNX"},{y:2025,p:"huston",a:"Jason Isbell",l:"Foxes in the Snow"},{y:2025,p:"huston",a:"Saba & No ID",l:"From the Private Collection"},{y:2025,p:"huston",a:"Bad Bunny",l:"DeBi TiRAR MaS FOToS"},{y:2025,p:"huston",a:"Zach Top",l:"Ain't In It For My Health"},{y:2025,p:"huston",a:"Joshua Hedley",l:"All Hat"},{y:2025,p:"huston",a:"Julien Baker / TORRES",l:"Send a Prayer My Way"},
+];
+
+// ═══════════════════════════════════════════════════════
+// COVER ART — MusicBrainz + Cover Art Archive
+// ═══════════════════════════════════════════════════════
+
+const COVER_CACHE_PREFIX='mna_cover_';
+const MB_UA='MusicNerdsArchive/1.0 (taa121288@gmail.com)';
+function cacheGet(a,l){try{return localStorage.getItem(COVER_CACHE_PREFIX+(a+'|||'+l).toLowerCase())}catch(e){return null}}
+function cacheSet(a,l,u){try{localStorage.setItem(COVER_CACHE_PREFIX+(a+'|||'+l).toLowerCase(),u)}catch(e){}}
+
+function makeCoverSvg(artist,album){
+  const h=(artist+album).split("").reduce((a,c)=>a+c.charCodeAt(0),0);
+  const h1=h%360,h2=(h*7)%360;
+  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g${h%999}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="hsl(${h1},25%,22%)"/><stop offset="100%" stop-color="hsl(${h2},20%,32%)"/></linearGradient></defs><rect width="100" height="100" fill="url(#g${h%999})"/></svg>`;
+}
+
+const fetchQueue=[];let queueRunning=false;
+function enqueueFetch(a,l,els){fetchQueue.push({a,l,els});if(!queueRunning)runQueue()}
+async function runQueue(){
+  queueRunning=true;const total=fetchQueue.length;let done=0;
+  const st=document.getElementById('coverStatus');
+  while(fetchQueue.length>0){
+    const j=fetchQueue.shift();done++;
+    if(st)st.textContent=`Loading covers ${done}/${total+done-1}`;
+    try{await doFetch(j.a,j.l,j.els)}catch(e){}
+    await new Promise(r=>setTimeout(r,1200));
+  }
+  if(st)st.textContent='';queueRunning=false;
+}
+async function doFetch(artist,album,els){
+  const q=encodeURIComponent(`releasegroup:"${album}" AND artist:"${artist}"`);
+  const r=await fetch(`https://musicbrainz.org/ws/2/release-group/?query=${q}&fmt=json&limit=3`,{headers:{'User-Agent':MB_UA}});
+  if(!r.ok){cacheSet(artist,album,'NONE');return}
+  const d=await r.json();const rgs=d['release-groups']||[];
+  if(!rgs.length){cacheSet(artist,album,'NONE');return}
+  let best=rgs[0];const al=artist.toLowerCase();
+  for(const rg of rgs){for(const c of (rg['artist-credit']||[])){if(c.name&&c.name.toLowerCase()===al){best=rg;break}}}
+  const url=`https://coverartarchive.org/release-group/${best.id}/front-250`;
+  try{const ir=await fetch(url,{method:'HEAD'});if(ir.ok||ir.redirected){const fu=ir.url||url;cacheSet(artist,album,fu);applyImg(els,fu,artist,album);return}}
+  catch(e){cacheSet(artist,album,url);applyImg(els,url,artist,album);return}
+  cacheSet(artist,album,'NONE');
+}
+function applyImg(els,url,a,l){
+  const fb=makeCoverSvg(a,l).replace(/'/g,"\\'").replace(/"/g,'&quot;');
+  els.forEach(el=>{el.innerHTML=`<img src="${url}" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.parentElement.innerHTML='${fb}'">`;el.dataset.loaded='true'});
+}
+function makeCover(artist,album,size){
+  const c=cacheGet(artist,album);
+  if(c&&c!=='NONE')return`<div class="cover" style="width:${size}px;height:${size}px;min-width:${size}px" data-loaded="true"><img src="${c}" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.parentElement.innerHTML='${makeCoverSvg(artist,album).replace(/'/g,"\\'").replace(/"/g,'&quot;')}'"></div>`;
+  return`<div class="cover" style="width:${size}px;height:${size}px;min-width:${size}px" data-artist="${artist.replace(/"/g,'&amp;quot;')}" data-album="${album.replace(/"/g,'&amp;quot;')}">${makeCoverSvg(artist,album)}</div>`;
+}
+function loadCovers(){
+  const cvs=document.querySelectorAll('.cover[data-artist]:not([data-loaded])');const uniq={};
+  cvs.forEach(c=>{const a=c.dataset.artist.replace(/&quot;/g,'"'),l=c.dataset.album.replace(/&quot;/g,'"'),k=a+'|||'+l;
+    const cc=cacheGet(a,l);if(cc==='NONE'){c.dataset.loaded='true';return}if(cc){applyImg([c],cc,a,l);return}
+    if(!uniq[k])uniq[k]={a,l,els:[]};uniq[k].els.push(c)});
+  Object.values(uniq).forEach(j=>enqueueFetch(j.a,j.l,j.els));
+}
+
+// ═══════════════════════════════════════════════════════
+// COMPONENTS
+// ═══════════════════════════════════════════════════════
+
+function makeTag(pid){const p=PEOPLE[pid];if(!p)return'';return`<span class="tag" style="color:${p.color}">${p.short}</span>`}
+
+function makePickHtml(pick,showPerson,showYear){
+  const rk=pick.r?`<span class="rank-num">${pick.r}.</span> `:'';
+  const fv=pick.f?'<span class="fav-mark">Fav</span>':'';
+  const nt=pick.n?`<div class="note">"${pick.n.length>100?pick.n.slice(0,100)+'…':pick.n}"</div>`:'';
+  const tr=pick.t?`<div class="track-name">${pick.t}</div>`:'';
+  const pe=showPerson?makeTag(pick.p):'';
+  const yr=showYear?`<span class="tag">${pick.y}</span>`:'';
+  return`<div class="pick">${makeCover(pick.a,pick.l,52)}<div class="info"><div>${rk}<span class="album-title">${pick.l}</span>${fv}</div><div class="artist">${pick.a}</div>${tr}${nt}<div class="meta">${pe}${yr}</div></div></div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// ANALYTICS
+// ═══════════════════════════════════════════════════════
+
+function computeAnalytics(){
+  const ak=p=>p.a+'|||'+p.l;
+  const am={};PICKS.forEach(p=>{const k=ak(p);if(!am[k])am[k]={a:p.a,l:p.l,pp:new Set(),yy:new Set()};am[k].pp.add(p.p);am[k].yy.add(p.y)});
+  const con=Object.values(am).map(a=>({a:a.a,l:a.l,pp:[...a.pp],yy:[...a.yy],c:a.pp.size})).filter(a=>a.c>1).sort((a,b)=>b.c-a.c);
+  const artMap={};PICKS.forEach(p=>{if(!artMap[p.a])artMap[p.a]={a:p.a,pp:new Set(),c:0,yy:new Set(),albums:new Set()};artMap[p.a].pp.add(p.p);artMap[p.a].c++;artMap[p.a].yy.add(p.y);artMap[p.a].albums.add(p.l)});
+  const ta=Object.values(artMap).map(a=>({...a,pp:[...a.pp],yy:[...a.yy],albums:[...a.albums]})).sort((a,b)=>b.c-a.c);
+  const allPeople=[...new Set(PICKS.map(p=>p.p))];
+  const stats=allPeople.map(pid=>({p:pid,t:PICKS.filter(x=>x.p===pid).length,yy:[...new Set(PICKS.filter(x=>x.p===pid).map(x=>x.y))].sort()})).sort((a,b)=>b.t-a.t);
+  const ov={};allPeople.forEach(p1=>{ov[p1]={};const s1=new Set(PICKS.filter(x=>x.p===p1).map(ak));allPeople.forEach(p2=>{if(p1===p2){ov[p1][p2]=s1.size;return}const s2=new Set(PICKS.filter(x=>x.p===p2).map(ak));let c=0;s1.forEach(a=>{if(s2.has(a))c++});ov[p1][p2]=c})});
+  const uniquePicks={};allPeople.forEach(pid=>{const my=PICKS.filter(x=>x.p===pid).map(ak);uniquePicks[pid]=my.filter(k=>am[k]&&am[k].pp.size===1).length});
+  return{con,ta,stats,ov,allPeople,uniquePicks};
+}
+const AN=computeAnalytics();
+
+// ═══════════════════════════════════════════════════════
+// TASTE SYNOPSES
+// ═══════════════════════════════════════════════════════
+
+function tasteSynopsis(pid){
+  const pp=PICKS.filter(p=>p.p===pid);
+  if(!pp.length)return'';
+  const synopses={
+    taylor:`If Bon Iver released a grocery list, Taylor would rank it. The undisputed ringleader of this whole operation, and also its most prolific oversharer — 24 albums in 2024 alone, with apologies for not including more. His taste sprawls from Kendrick to bluegrass to what he unironically calls "woods fairy music." Keeps a turntable spinning, a Martin guitar fantasy going, and an open invitation for anyone named Jason Isbell to ruin him emotionally. Will find a way to bring up Goose. You've been warned.`,
+    robert:`Showed up in 2025 with 15 ranked albums and the most unhinged reference points in the archive — Clippy, Myst, StarCraft, and Princess Zelda all made the liner notes. Finds beauty in frat-boy performance art and sad country songs written in the multiverse. His wife thinks Geese sounds like church camp music, and he included that detail anyway. Pairs Prince with post-punk, Devo with divorce, and has never once been accused of playing it safe.`,
+    earl:`The guy who actually goes to the shows. His lists double as a Denver venue guide — Gothic Theatre, Mission Ballroom, Globe Hall, repeat. Gravitates toward women who can scream and men who can cry, preferably on the same album. Has picked Nilufer Yanya three separate years, which at this point is less a preference and more a commitment. Will die on the "justice for 3D Country" hill. Shares so many picks with Taylor that they might actually be the same person wearing different hats.`,
+    huston:`Starts every email admitting he didn't listen to anything all year, then drops a list that swings from Pusha T to Zach Top without blinking. Self-proclaimed inventor of the genre "Gay Country." Once picked an album because he loves Italian food. Listens to Kendrick at his desk surrounded by white people doing math, and that's a direct quote. Will recommend you a fantasy novel if you let him. His wife controls roughly 15% of his list and he wants you to tell her he loved Bad Bunny. He did not ask us to fact-check that.`,
+    tyler:`Alphabetizes his lists, never ranks them, and has probably read the Wikipedia page for every album he picks. The group's resident "I was into them before they were cool" energy, except he's usually right. Pulls from jazz, ambient, post-punk, and experimental corners nobody else is touching — Floating Points, Vijay Iyer, black midi — and casually drops a David Foster Wallace reference next to a Charli xcx pick. Somehow makes it all feel cohesive. The most refined palate in the room and he knows it.`,
+    paul:`Nashville radio host energy in the best possible way. His lists read like you accidentally tuned into the coolest station on earth at 2 AM — krautrock into Saharan rock into Japanese psych into ambient folk into someone named Fuubutsushi. Consistently picks albums that make everyone else Google the artist name. Got Taylor a secret Jack White pressing from Third Man Records, which is genuinely one of the most thoughtful things in this entire archive. The highest percentage of "wait, who?" picks every single year.`,
+    brian:`The emotional range of a Spotify algorithm that actually works. PinkPantheress is "cool witch music," Floating Points is for sleeping, Sufjan is for sobbing, and somewhere in between there's Jockstrap and R.A.P. Ferreira. Numbers his rankings with the energy of someone who spent real time on the order. Comfortable calling an album his favorite Big Thief record in a group where that's a fighting-words statement. Showed up in 2021 and 2022 with some of the most interesting lists in the archive, then let the silence speak for itself.`,
+    clint:`The steady hand. While everyone else is chasing the weird and the loud, Clint is over here picking Phoebe Bridgers number one, Andy Shauf number two, and making it feel like the most obvious thing in the world. Favors songwriters who know when to stop — clean production, tight arrangements, nothing wasted. Put Stephen Malkmus at number six and Kacey Musgraves on the same list, which is a range flex he'd never brag about. The kind of taste that ages really well.`,
+    danny:`The porch guy. Fleet Foxes, Fruit Bats, Kevin Morby, Sturgill — if it sounds like it was recorded near a creek with a whiskey in hand, Danny's already on his second listen. Contributed in the early pandemic years and kept the whole archive's roots planted in actual soil while everyone else was discovering PinkPantheress. Somebody had to hold down the Americana wing of this thing, and Danny did it with zero pretension and excellent taste.`
+  };
+  return synopses[pid]||`${pp.length} picks across the archive.`;
+}
+
+// ═══════════════════════════════════════════════════════
+// VIEWS
+// ═══════════════════════════════════════════════════════
+
+function renderHome(){
+  const totalArtists=new Set(PICKS.map(p=>p.a)).size;
+  let h=`<div style="padding-top:48px;padding-bottom:20px"><div class="page-subtitle">A shared archive, 2020–2025</div><h1 class="page-title">Music Nerds</h1><p style="font-family:var(--serif);font-size:15px;color:var(--fg3);margin-top:12px;line-height:1.6;max-width:520px">${PICKS.length} album picks from ${AN.allPeople.length} friends, extracted from six years of end-of-year email threads. A document of collective taste.</p></div>`;
+
+  h+=`<div style="display:flex;gap:32px;margin-bottom:40px;padding:20px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)">`;
+  [{l:"Albums",v:PICKS.length},{l:"Artists",v:totalArtists},{l:"Contributors",v:AN.allPeople.length},{l:"Years",v:6}].forEach(s=>{
+    h+=`<div><div style="font-family:var(--serif);font-size:1.8rem;color:var(--fg)">${s.v}</div><div style="font-family:var(--sans);font-size:10px;color:var(--fg4);text-transform:uppercase;letter-spacing:0.08em;margin-top:2px">${s.l}</div></div>`;
+  });
+  h+=`</div>`;
+
+  h+=`<div class="section-label">Shared Picks — Albums chosen by multiple people</div>`;
+  AN.con.slice(0,12).forEach(item=>{
+    h+=`<div class="consensus-item"><div class="c-cover">${makeCover(item.a,item.l,40).replace(/class="cover"/,'class="c-cover"').replace(/<div class="c-cover"/,'<div class="cover"')}</div><div class="c-info"><div class="c-album">${item.l}</div><div class="c-detail">${item.a} · ${item.yy.join(', ')}</div></div><div class="c-tags">${item.pp.map(pid=>makeTag(pid)).join(' ')}</div></div>`;
+  });
+
+  h+=`<div class="section-gap"></div><div class="section-label">Source Threads</div>`;
+  [{yr:2025,n:"4 lists"},{yr:2024,n:"5 lists"},{yr:2023,n:"5 lists"},{yr:2022,n:"7 lists"},{yr:2021,n:"7 lists"},{yr:2020,n:"6 lists"}].forEach(t=>{
+    h+=`<div class="thread-line"><span class="tl-year">${t.yr}</span><span class="tl-info">${t.n} extracted</span></div>`;
+  });
+  return h;
+}
+
+function renderYear(year){
+  const yp=PICKS.filter(p=>p.y===year);const people=[...new Set(yp.map(p=>p.p))];
+  let h=`<h1 class="year-heading">${year}</h1><p class="page-subtitle" style="margin-top:4px;margin-bottom:32px">${people.length} contributors · ${yp.length} albums</p>`;
+  people.forEach(pid=>{
+    const pp=yp.filter(p=>p.p===pid).sort((a,b)=>(a.r||999)-(b.r||999));
+    const person=PEOPLE[pid];
+    h+=`<div style="margin-bottom:36px"><div class="person-heading" style="color:${person.color}">${person.name}<span class="person-count">${pp.length} picks</span></div><div>${pp.map(pk=>makePickHtml(pk,false,false)).join('')}</div></div>`;
+  });
+  return h;
+}
+
+function renderArtists(){
+  let h=`<h1 class="page-title" style="padding-top:20px">Artists</h1><p class="page-subtitle" style="margin-bottom:16px">${AN.ta.length} unique artists across 6 years</p>`;
+  h+=`<input class="search-field" id="artistSearchInput" placeholder="Filter artists…" oninput="filterArtists()">`;
+  h+=`<div id="artistList" style="margin-top:16px">`;
+  AN.ta.slice(0,60).forEach(art=>{
+    h+=`<div class="artist-row"><div class="ar-name">${art.a}</div><div class="ar-meta">${art.c} pick${art.c>1?'s':''} · ${art.yy.join(', ')} · ${art.pp.map(pid=>makeTag(pid)).join(' ')}</div><div class="ar-albums">${art.albums.join(' · ')}</div></div>`;
+  });
+  h+=`</div>`;return h;
+}
+function filterArtists(){
+  const q=document.getElementById('artistSearchInput').value.toLowerCase();
+  const filtered=AN.ta.filter(a=>!q||a.a.toLowerCase().includes(q));
+  let h='';filtered.slice(0,60).forEach(art=>{
+    h+=`<div class="artist-row"><div class="ar-name">${art.a}</div><div class="ar-meta">${art.c} pick${art.c>1?'s':''} · ${art.yy.join(', ')} · ${art.pp.map(pid=>makeTag(pid)).join(' ')}</div><div class="ar-albums">${art.albums.join(' · ')}</div></div>`;
+  });
+  document.getElementById('artistList').innerHTML=h;
+}
+
+function renderSearch(){
+  return`<h1 class="page-title" style="padding-top:20px">Search</h1><p class="page-subtitle" style="margin-bottom:16px">Find any album or artist in the archive</p><input class="search-field" id="searchInput" placeholder="Album or artist name…" oninput="doSearch()"><div id="searchResults" style="margin-top:8px"></div>`;
+}
+function doSearch(){
+  const q=document.getElementById('searchInput').value.toLowerCase();
+  const res=PICKS.filter(p=>!q||p.l.toLowerCase().includes(q)||p.a.toLowerCase().includes(q));
+  document.getElementById('searchResults').innerHTML=res.slice(0,30).map(pk=>makePickHtml(pk,true,true)).join('');
+  setTimeout(loadCovers,100);
+}
+
+function renderPeople(){
+  let h=`<h1 class="page-title" style="padding-top:20px">Contributors</h1><p class="page-subtitle" style="margin-bottom:20px">${AN.allPeople.length} people across 6 years of email threads</p><div class="people-grid">`;
+  AN.allPeople.forEach(pid=>{
+    const pp=PICKS.filter(p=>p.p===pid);const yrs=[...new Set(pp.map(p=>p.y))].sort();const person=PEOPLE[pid];
+    const synopsis=tasteSynopsis(pid);
+    // First two sentences for card preview
+    const sentences=synopsis.match(/[^.!]+[.!]+/g)||[synopsis];
+    const short=sentences.slice(0,2).join('').trim();
+    h+=`<div class="person-card" style="border-color:${person.color}30" onclick="showPerson('${pid}')"><div class="pc-name" style="color:${person.color}">${person.name}</div><div class="pc-info">${pp.length} picks · ${yrs.join(', ')}</div><div class="pc-taste">${short}</div><div class="pc-arrow">View all picks →</div></div>`;
+  });
+  return h+`</div>`;
+}
+
+function showPerson(pid){
+  activeTab='person_'+pid;
+  document.querySelectorAll('nav button').forEach(btn=>{btn.classList.toggle('active',btn.dataset.tab==='people')});
+  const app=document.getElementById('app');
+  app.innerHTML=`<div class="view active">${renderPerson(pid)}</div>`;
+  setTimeout(loadCovers,50);window.scrollTo(0,0);
+}
+
+function renderPerson(pid){
+  const person=PEOPLE[pid];if(!person)return'';
+  const pp=PICKS.filter(p=>p.p===pid);
+  const yrs=[...new Set(pp.map(p=>p.y))].sort().reverse();
+  const artists=[...new Set(pp.map(p=>p.a))];
+  const synopsis=tasteSynopsis(pid);
+
+  // Uniqueness stat
+  const myKeys=pp.map(p=>p.a+'|||'+p.l);
+  const allAlbumMap={};PICKS.forEach(p=>{const k=p.a+'|||'+p.l;if(!allAlbumMap[k])allAlbumMap[k]=new Set();allAlbumMap[k].add(p.p)});
+  const unique=myKeys.filter(k=>allAlbumMap[k]&&allAlbumMap[k].size===1).length;
+  const pct=Math.round((unique/pp.length)*100);
+
+  // Returning artists (picked more than once)
+  const ac={};pp.forEach(p=>{ac[p.a]=(ac[p.a]||0)+1});
+  const returning=Object.entries(ac).filter(e=>e[1]>1).sort((a,b)=>b[1]-a[1]);
+
+  // Shared albums with others
+  const sharedAlbums=myKeys.filter(k=>allAlbumMap[k]&&allAlbumMap[k].size>1).length;
+
+  let h=`<button class="back-link" onclick="switchTab('people')">← All Contributors</button>`;
+  h+=`<div class="person-detail-header"><div class="pd-name" style="color:${person.color}">${person.name}</div>`;
+  h+=`<div class="pd-meta">${pp.length} picks · ${artists.length} artists · ${yrs.length} year${yrs.length>1?'s':''}</div>`;
+  h+=`<div class="pd-taste">${synopsis}</div>`;
+  h+=`</div>`;
+
+  // Quick stats row
+  h+=`<div style="display:flex;gap:28px;padding:16px 0 24px;border-bottom:1px solid var(--border);margin-bottom:28px;flex-wrap:wrap">`;
+  h+=`<div><div style="font-family:var(--serif);font-size:1.5rem;color:${person.color}">${pct}%</div><div style="font-family:var(--sans);font-size:10px;color:var(--fg4);text-transform:uppercase;letter-spacing:0.06em;margin-top:1px">Unique picks</div></div>`;
+  h+=`<div><div style="font-family:var(--serif);font-size:1.5rem;color:${person.color}">${sharedAlbums}</div><div style="font-family:var(--sans);font-size:10px;color:var(--fg4);text-transform:uppercase;letter-spacing:0.06em;margin-top:1px">Shared with group</div></div>`;
+  if(returning.length>0){
+    h+=`<div><div style="font-family:var(--serif);font-size:1.5rem;color:${person.color}">${returning.length}</div><div style="font-family:var(--sans);font-size:10px;color:var(--fg4);text-transform:uppercase;letter-spacing:0.06em;margin-top:1px">Returning artists</div></div>`;
+  }
+  h+=`</div>`;
+
+  // Returning artists
+  if(returning.length>0){
+    h+=`<div class="section-label">Artists They Keep Coming Back To</div>`;
+    h+=`<div style="margin-bottom:28px">`;
+    returning.forEach(([artist,count])=>{
+      const albumsForArtist=[...new Set(pp.filter(p=>p.a===artist).map(p=>p.l))];
+      const yearsForArtist=[...new Set(pp.filter(p=>p.a===artist).map(p=>p.y))].sort();
+      h+=`<div style="padding:6px 0;border-bottom:1px solid var(--border)"><span style="font-family:var(--serif);font-size:14px;color:var(--fg);font-weight:500">${artist}</span> <span style="font-family:var(--sans);font-size:11px;color:var(--fg4);margin-left:4px">${count} picks · ${yearsForArtist.join(', ')}</span><div style="font-family:var(--serif);font-size:12px;color:var(--fg3);font-style:italic;margin-top:2px">${albumsForArtist.join(' · ')}</div></div>`;
+    });
+    h+=`</div>`;
+  }
+
+  // Albums by year
+  yrs.forEach(yr=>{
+    const yrPicks=pp.filter(p=>p.y===yr).sort((a,b)=>(a.r||999)-(b.r||999));
+    h+=`<div style="margin-bottom:36px"><div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px"><span class="year-heading" style="font-size:2rem;padding-top:0">${yr}</span><span class="page-subtitle" style="margin-top:0">${yrPicks.length} pick${yrPicks.length>1?'s':''}</span></div>`;
+    h+=`<div>${yrPicks.map(pk=>makePickHtml(pk,false,false)).join('')}</div></div>`;
+  });
+
+  return h;
+}
+
+function renderStats(){
+  let h=`<h1 class="page-title" style="padding-top:20px">Analytics</h1><p class="page-subtitle" style="margin-bottom:24px">Patterns across six years of collective listening</p>`;
+
+  h+=`<div class="section-label">Picks per person</div>`;
+  AN.stats.forEach(s=>{const p=PEOPLE[s.p];h+=`<div class="stat-row"><div class="stat-label" style="color:${p.color}">${p.short}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.min((s.t/65)*100,100)}%;background:${p.color}"></div></div><div class="stat-val">${s.t}</div></div>`});
+
+  h+=`<div class="section-gap-sm"></div><div class="section-label">Uniqueness — albums only they picked</div>`;
+  Object.entries(AN.uniquePicks).sort((a,b)=>b[1]-a[1]).forEach(([pid,count])=>{
+    const total=PICKS.filter(x=>x.p===pid).length;const pct=Math.round((count/total)*100);const p=PEOPLE[pid];
+    h+=`<div class="stat-row"><div class="stat-label" style="color:${p.color}">${p.short}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${p.color}"></div></div><div class="stat-val">${pct}%</div></div>`;
+  });
+
+  h+=`<div class="section-gap-sm"></div><div class="section-label">Taste overlap — shared album picks</div><div style="overflow-x:auto;padding-bottom:8px"><table class="ov-table"><thead><tr><th></th>`;
+  AN.allPeople.forEach(pid=>{h+=`<th style="color:${PEOPLE[pid].color}">${PEOPLE[pid].short}</th>`});
+  h+=`</tr></thead><tbody>`;
+  AN.allPeople.forEach(p1=>{h+=`<tr><td class="row-hd" style="color:${PEOPLE[p1].color}">${PEOPLE[p1].short}</td>`;
+    AN.allPeople.forEach(p2=>{const v=AN.ov[p1][p2]||0;const isDiag=p1===p2;const cls=isDiag?'':v>3?'hot':v>1?'warm':'';
+      h+=`<td class="${cls}" style="${isDiag?'color:var(--fg4)':''}">${isDiag?'—':v>0?v:'·'}</td>`});
+    h+=`</tr>`});
+  h+=`</tbody></table></div>`;
+
+  h+=`<div class="section-gap"></div><div class="section-label">Notes — patterns across the archive</div>`;
+  [{t:"Alvvays, Blue Rev (2022)",d:"Five people picked this — Tyler, Clint, Taylor, Earl, and Paul. Tied with Waxahatchee's Saint Cloud for the highest overlap in the archive."},{t:"Andy Shauf — the group's constant",d:"Neon Skyline (2020, three picks), Wilds (2021, four picks), Norm (2023). No artist has more consensus across more years."},{t:"Kendrick, every single year",d:"From RTJ4 in 2020 through GNX in 2024–25. The only artist to appear on lists in every year of the archive."},{t:"Wednesday's arc",d:"Earl recommended them to the group in 2022. By 2023, Taylor and Earl both picked Rat Saw God. In 2025, they both picked Bleeds. A slow build into consensus."},{t:"Cory Hanson / Wand",d:"A quiet through-line from 2021 to 2025. Taylor, Earl, Clint, and Paul have all picked Cory or Wand at different points — a shared appreciation that threads through the whole archive."},{t:"Taylor and Earl — taste twins",d:"The highest overlap pair in the group. They've shared picks in every single year from 2020 to 2025."},{t:"Paul's parallel universe",d:"Krautrock, Saharan rock, Japanese psych, shoegaze, ambient folk. Nashville WXNA radio host. Consistently the most unique list every year."}
+  ].forEach(ins=>{h+=`<div class="insight-block"><div class="ib-title">${ins.t}</div><div class="ib-body">${ins.d}</div></div>`});
+
+  return h;
+}
+
+// ═══════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════
+
+const TABS=[
+  {id:'home',label:'Archive'},
+  {id:'y2025',label:'2025'},{id:'y2024',label:'2024'},{id:'y2023',label:'2023'},
+  {id:'y2022',label:'2022'},{id:'y2021',label:'2021'},{id:'y2020',label:'2020'},
+  {id:'artists',label:'Artists'},
+  {id:'people',label:'People'},
+  {id:'search',label:'Search'},
+  {id:'stats',label:'Stats'},
+];
+let activeTab='home';
+
+function switchTab(tabId){
+  activeTab=tabId;
+  document.querySelectorAll('nav button').forEach(btn=>{btn.classList.toggle('active',btn.dataset.tab===tabId)});
+  const app=document.getElementById('app');let content='';
+  switch(tabId){
+    case'home':content=renderHome();break;
+    case'y2025':content=renderYear(2025);break;case'y2024':content=renderYear(2024);break;
+    case'y2023':content=renderYear(2023);break;case'y2022':content=renderYear(2022);break;
+    case'y2021':content=renderYear(2021);break;case'y2020':content=renderYear(2020);break;
+    case'artists':content=renderArtists();break;case'people':content=renderPeople();break;
+    case'search':content=renderSearch();break;case'stats':content=renderStats();break;
+  }
+  app.innerHTML=`<div class="view active">${content}</div>`;
+  if(tabId==='search')doSearch();
+  setTimeout(loadCovers,50);window.scrollTo(0,0);
+}
+
+const nav=document.getElementById('nav');
+TABS.forEach(tab=>{const btn=document.createElement('button');btn.textContent=tab.label;btn.dataset.tab=tab.id;btn.onclick=()=>switchTab(tab.id);if(tab.id==='home')btn.classList.add('active');nav.appendChild(btn)});
+switchTab('home');
+</script>
+</body>
+</html>
